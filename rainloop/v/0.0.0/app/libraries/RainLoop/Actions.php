@@ -131,6 +131,8 @@ class Actions
 	 */
 	private $sUpdateAuthToken;
 
+	private $bIsAjax;
+
 	/**
 	 * @access private
 	 */
@@ -1762,8 +1764,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 				$aResult['UseTokenProtection'] = (bool) $oConfig->Get('security', 'csrf_protection', true);
 				$aResult['EnabledPlugins'] = (bool) $oConfig->Get('plugins', 'enable', false);
 
-				$aResult['VerifySslCertificate'] = (bool) $oConfig->Get('ssl', 'verify_certificate', false);
-				$aResult['AllowSelfSigned'] = (bool) $oConfig->Get('ssl', 'allow_self_signed', true);
+				$aResult['VerifySslCertificate'] = (bool) $oConfig->Get('ssl', 'verify_certificate', true);
+				$aResult['AllowSelfSigned'] = (bool) $oConfig->Get('ssl', 'allow_self_signed', false);
 
 				$aDrivers = \class_exists('PDO') ? \PDO::getAvailableDrivers() : null;
 				$aResult['MySqlIsSupported'] = \is_array($aDrivers) ? \in_array('mysql', $aDrivers) : false;
@@ -1967,7 +1969,7 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 			($bAdmin ? 'admin' : 'app').($bAppJsDebug ? '' : '.min').'.js');
 
 		$aResult['StaticAppJsNextLink'] = $this->StaticPath('js/'.($bAdmin ? 'admin' : 'app').'.next.js');
-		$aResult['StaticEditorJsLink'] = $this->StaticPath('ckeditor/ckeditor.js');
+		$aResult['StaticEditorJsLink'] = $this->StaticPath('editor/jodit.min.js');
 
 		$aResult['EditorDefaultType'] = \in_array($aResult['EditorDefaultType'], array('Plain', 'Html', 'HtmlForced', 'PlainForced')) ?
 			$aResult['EditorDefaultType'] : 'Plain';
@@ -4122,8 +4124,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 
 				$iTime = \microtime(true);
 				$oImapClient->Connect($oDomain->IncHost(), $oDomain->IncPort(), $oDomain->IncSecure(),
-					!!$this->Config()->Get('ssl', 'verify_certificate', false),
-					!!$this->Config()->Get('ssl', 'allow_self_signed', true),
+					!!$this->Config()->Get('ssl', 'verify_certificate', true),
+					!!$this->Config()->Get('ssl', 'allow_self_signed', false),
 					$this->Config()->Get('ssl', 'client_cert', '')
 				);
 
@@ -4164,8 +4166,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 					$iTime = \microtime(true);
 					$oSmtpClient->Connect($oDomain->OutHost(), $oDomain->OutPort(),
 						\MailSo\Smtp\SmtpClient::EhloHelper(), $oDomain->OutSecure(),
-						!!$this->Config()->Get('ssl', 'verify_certificate', false),
-						!!$this->Config()->Get('ssl', 'allow_self_signed', true)
+						!!$this->Config()->Get('ssl', 'verify_certificate', true),
+						!!$this->Config()->Get('ssl', 'allow_self_signed', false)
 					);
 
 					$iSmtpTime = \microtime(true) - $iTime;
@@ -4198,8 +4200,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 
 					$iTime = \microtime(true);
 					$oSieveClient->Connect($oDomain->SieveHost(), $oDomain->SievePort(), $oDomain->SieveSecure(),
-						!!$this->Config()->Get('ssl', 'verify_certificate', false),
-						!!$this->Config()->Get('ssl', 'allow_self_signed', true)
+						!!$this->Config()->Get('ssl', 'verify_certificate', true),
+						!!$this->Config()->Get('ssl', 'allow_self_signed', false)
 					);
 
 					$iSieveTime = \microtime(true) - $iTime;
@@ -4250,7 +4252,8 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 
 	private function rainLoopUpdatable()
 	{
-		return @file_exists(APP_INDEX_ROOT_PATH.'index.php') &&
+		return '' !== APP_REPOSITORY_PATH && '' !== APP_REPO_CORE_FILE &&
+			@file_exists(APP_INDEX_ROOT_PATH.'index.php') &&
 			@is_writable(APP_INDEX_ROOT_PATH.'index.php') &&
 			@is_writable(APP_INDEX_ROOT_PATH.'rainloop/') &&
 			APP_VERSION !== APP_DEV_VERSION
@@ -4634,6 +4637,11 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 	 */
 	public function downloadRemotePackageByUrl($sUrl)
 	{
+		if ('https' !== \strtolower((string) \parse_url($sUrl, PHP_URL_SCHEME)))
+		{
+			return '';
+		}
+
 		$bResult = false;
 		$sTmp = APP_PRIVATE_DATA.\md5(\microtime(true).$sUrl).'.zip';
 		$pDest = @\fopen($sTmp, 'w+b');
@@ -7493,7 +7501,7 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 				$sContentType = '';
 
 				$rFile = $this->FilesProvider()->GetFile($oAccount, $sTempName, 'wb+');
-				if ($rFile && $oHttp->SaveUrlToFile($sUrl, $rFile, '', $sContentType, $iCode, $this->Logger(), 60,
+				if ($rFile && \MailSo\Base\PublicUrl::SaveToFile($sUrl, $rFile, '', $sContentType, $iCode, $this->Logger(), 60,
 						$this->Config()->Get('labs', 'curl_proxy', ''), $this->Config()->Get('labs', 'curl_proxy_auth', '')))
 				{
 					$mResult[$sUrl] = $sTempName;
@@ -7534,7 +7542,7 @@ NewThemeLink IncludeCss LoadingDescriptionEsc LangLink IncludeBackground Plugins
 			$sContentType = '';
 
 			$rFile = $this->FilesProvider()->GetFile($oAccount, $sTempName, 'wb+');
-			if ($rFile && $oHttp->SaveUrlToFile($sUrl.'&key='.$sGoogleApiKey, $rFile, '', $sContentType, $iCode, $this->Logger(), 60,
+			if ($rFile && \MailSo\Base\PublicUrl::SaveToFile($sUrl.'&key='.$sGoogleApiKey, $rFile, '', $sContentType, $iCode, $this->Logger(), 60,
 					$this->Config()->Get('labs', 'curl_proxy', ''), $this->Config()->Get('labs', 'curl_proxy_auth', ''),
 					array('Authorization: Bearer '.$sAccessToken)))
 			{

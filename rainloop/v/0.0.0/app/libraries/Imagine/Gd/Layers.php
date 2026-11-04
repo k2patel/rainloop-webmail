@@ -26,7 +26,7 @@ class Layers extends AbstractLayers
 
     public function __construct(Image $image, PaletteInterface $palette, $resource)
     {
-        if (!is_resource($resource)) {
+        if (!($resource instanceof \GdImage) && !is_resource($resource)) {
             throw new RuntimeException('Invalid Gd resource provided');
         }
 
@@ -61,6 +61,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return new Image($this->resource, $this->palette, new MetadataBag());
@@ -69,6 +70,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->offset;
@@ -77,6 +79,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function next()
     {
         ++$this->offset;
@@ -85,6 +88,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->offset = 0;
@@ -93,6 +97,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return $this->offset < 1;
@@ -101,6 +106,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return 1;
@@ -109,6 +115,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return 0 === $offset;
@@ -117,6 +124,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if (0 === $offset) {
@@ -129,6 +137,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new NotSupportedException('GD does not support layer set');
@@ -137,6 +146,7 @@ class Layers extends AbstractLayers
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new NotSupportedException('GD does not support layer unset');

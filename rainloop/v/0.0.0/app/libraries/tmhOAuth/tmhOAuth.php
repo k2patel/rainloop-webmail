@@ -11,6 +11,7 @@
  *
  * 20 February 2013
  */
+/* Modified by the maintained RainLoop fork on 2026-11-03 for PHP 8 compatibility. */
 class tmhOAuth {
   const VERSION = '0.7.5';
 
@@ -705,7 +706,7 @@ class tmhOAuth {
     $info = curl_getinfo($c);
     $error = curl_error($c);
     $errno = curl_errno($c);
-    curl_close($c);
+    $c = null;
 
     // store the response
     $this->response['code'] = $code;

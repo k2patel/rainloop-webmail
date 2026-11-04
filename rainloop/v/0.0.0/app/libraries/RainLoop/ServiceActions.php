@@ -128,13 +128,11 @@ class ServiceActions
 
 		try
 		{
-			if ($this->oHttp->IsPost() &&
-				$this->Config()->Get('security', 'csrf_protection', false) &&
-				$this->oHttp->GetPost('XToken', '') !== \RainLoop\Utils::GetCsrfToken())
+			if (!$this->oHttp->IsGet() || !\in_array($sAction, array('Message', 'MessageList'), true))
 			{
-				throw new \RainLoop\Exceptions\ClientException(\RainLoop\Notifications::InvalidToken);
+				$this->verifyPostRequest();
 			}
-			else if (!empty($sAction))
+			if (!empty($sAction))
 			{
 				$sMethodName = 'Do'.$sAction;
 
@@ -294,8 +292,19 @@ class ServiceActions
 	}
 
 	/**
-	 * @return string
+	 * @return void
 	 */
+	private function verifyPostRequest()
+	{
+		$sToken = $this->oHttp->GetPost('XToken', '');
+		if (!$this->oHttp->IsPost() ||
+			($this->Config()->Get('security', 'csrf_protection', true) &&
+			(!\is_string($sToken) || !\hash_equals(\RainLoop\Utils::GetCsrfToken(), $sToken))))
+		{
+			throw new \RainLoop\Exceptions\ClientException(\RainLoop\Notifications::InvalidToken);
+		}
+	}
+
 	public function ServiceAppend()
 	{
 		@\ob_start();
@@ -303,6 +312,7 @@ class ServiceActions
 		$oException = null;
 		try
 		{
+			$this->verifyPostRequest();
 			if (\method_exists($this->oActions, 'Append') &&
 				\is_callable(array($this->oActions, 'Append')))
 			{
@@ -348,6 +358,7 @@ class ServiceActions
 		$aResponseItem = null;
 		try
 		{
+			$this->verifyPostRequest();
 			$aFile = null;
 			$sInputName = 'uploader';
 			$iError = \RainLoop\Enumerations\UploadError::UNKNOWN;
@@ -464,7 +475,7 @@ class ServiceActions
 			{
 				$iCode = 404;
 				$sContentType = '';
-				$mResult = $this->oHttp->GetUrlAsString($aData['Url'], 'RainLoop External Proxy', $sContentType, $iCode);
+				$mResult = \MailSo\Base\PublicUrl::GetAsString($aData['Url'], 'RainLoop External Proxy', $sContentType, $iCode);
 
 				if (false !== $mResult && 200 === $iCode &&
 					\in_array($sContentType, array('image/png', 'image/jpeg', 'image/jpg', 'image/bmp', 'image/gif')))

@@ -22,6 +22,8 @@ class Logger extends \MailSo\Base\Collection
 	 */
 	private $bUsed;
 
+	private static $oLoggedExceptions;
+
 	/**
 	 * @var array
 	 */
@@ -50,6 +52,11 @@ class Logger extends \MailSo\Base\Collection
 	protected function __construct($bRegPhpErrorHandler = true)
 	{
 		parent::__construct();
+
+		if (null === self::$oLoggedExceptions)
+		{
+			self::$oLoggedExceptions = new \WeakMap();
+		}
 
 		$this->bUsed = false;
 		$this->aForbiddenTypes = array();
@@ -356,12 +363,12 @@ class Logger extends \MailSo\Base\Collection
 	{
 		if ($oException instanceof \Exception)
 		{
-			if (isset($oException->__LOGINNED__))
+			if (isset(self::$oLoggedExceptions[$oException]))
 			{
 				return true;
 			}
 
-			$oException->__LOGINNED__ = true;
+			self::$oLoggedExceptions[$oException] = true;
 
 			return $this->Write((string) $oException, $iType, $sName, $bSearchSecretWords, $bDiplayCrLf);
 		}
@@ -383,12 +390,12 @@ class Logger extends \MailSo\Base\Collection
 	{
 		if ($oException instanceof \Exception)
 		{
-			if (isset($oException->__LOGINNED__))
+			if (isset(self::$oLoggedExceptions[$oException]))
 			{
 				return true;
 			}
 
-			$oException->__LOGINNED__ = true;
+			self::$oLoggedExceptions[$oException] = true;
 
 			return $this->Write($oException->getMessage(), $iType, $sName, $bSearchSecretWords, $bDiplayCrLf);
 		}

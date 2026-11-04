@@ -57,20 +57,20 @@ class NewOpenPgpKeyPopupView extends AbstractViewNext {
 			try {
 				PgpStore.openpgp
 					.generateKey({
-						userIds: [userId],
-						numBits: pInt(this.keyBitLength()),
-						passphrase: trim(this.password())
+						type: 'rsa',
+						userIDs: [userId],
+						rsaBits: pInt(this.keyBitLength()),
+						passphrase: this.password()
 					})
-					.then((keyPair) => {
-						this.submitRequest(false);
-
-						if (keyPair && keyPair.privateKeyArmored) {
-							openpgpKeyring.privateKeys.importKey(keyPair.privateKeyArmored);
-							openpgpKeyring.publicKeys.importKey(keyPair.publicKeyArmored);
+					.then(async (keyPair) => {
+						if (keyPair && keyPair.privateKey) {
+							await openpgpKeyring.privateKeys.importKey(keyPair.privateKey);
+							await openpgpKeyring.publicKeys.importKey(keyPair.publicKey);
 
 							openpgpKeyring.store();
 
-							getApp().reloadOpenPgpKeys();
+							await getApp().reloadOpenPgpKeys();
+							this.submitRequest(false);
 							delegateRun(this, 'cancelCommand');
 						}
 					})

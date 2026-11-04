@@ -61,11 +61,11 @@ class PoppassdClient extends \MailSo\Net\NetClient
 	 */
 	public function Connect($sServerName, $iPort = 106,
 		$iSecurityType = \MailSo\Net\Enumerations\ConnectionSecurityType::AUTO_DETECT,
-		$bVerifySsl = false, $bAllowSelfSigned = true)
+		$bVerifySsl = false, $bAllowSelfSigned = true, $sClientCert = '')
 	{
 		$this->iRequestTime = \microtime(true);
 
-		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned);
+		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned, $sClientCert);
 
 		$this->validateResponse();
 

@@ -14,13 +14,13 @@ class CookieDriver {
 			storageResult = null;
 
 		try {
-			storageResult = Cookies.getJSON(CLIENT_SIDE_STORAGE_INDEX_NAME);
+			storageResult = JSON.parse(Cookies.get(CLIENT_SIDE_STORAGE_INDEX_NAME) || 'null');
 		} catch (e) {} // eslint-disable-line no-empty
 
 		(storageResult || (storageResult = {}))[key] = data;
 
 		try {
-			Cookies.set(CLIENT_SIDE_STORAGE_INDEX_NAME, storageResult, {
+			Cookies.set(CLIENT_SIDE_STORAGE_INDEX_NAME, JSON.stringify(storageResult), {
 				expires: 30
 			});
 
@@ -38,7 +38,7 @@ class CookieDriver {
 		let result = null;
 
 		try {
-			const storageResult = Cookies.getJSON(CLIENT_SIDE_STORAGE_INDEX_NAME);
+			const storageResult = JSON.parse(Cookies.get(CLIENT_SIDE_STORAGE_INDEX_NAME) || 'null');
 			result = storageResult && !isUnd(storageResult[key]) ? storageResult[key] : null;
 		} catch (e) {} // eslint-disable-line no-empty
 

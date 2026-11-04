@@ -993,6 +993,7 @@ class MessageListMailBoxUserView extends AbstractViewNext {
 			queueSize: 1,
 			multipleSizeLimit: 1,
 			hidden: {
+				XToken: () => Settings.appSettingsGet('token'),
 				Folder: () => FolderStore.currentFolderFullNameRaw()
 			},
 			dragAndDropElement: this.dragOverArea(),

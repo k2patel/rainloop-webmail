@@ -9,6 +9,7 @@ import { changeTheme, convertThemeName } from 'Common/Utils';
 import { userBackground, themePreviewLink, uploadBackground } from 'Common/Links';
 import { i18n } from 'Common/Translator';
 
+import * as Settings from 'Storage/Settings';
 import { capa } from 'Storage/Settings';
 
 import ThemeStore from 'Stores/Theme';
@@ -99,6 +100,7 @@ class ThemesUserSettings {
 			const oJua = new Jua({
 				'action': uploadBackground(),
 				'name': 'uploader',
+				'hidden': { XToken: () => Settings.appSettingsGet('token') },
 				'queueSize': 1,
 				'multipleSizeLimit': 1,
 				'disableDragAndDrop': true,

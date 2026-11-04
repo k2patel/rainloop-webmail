@@ -712,19 +712,10 @@ ko.bindingHandlers.droppable = {
 };
 
 ko.bindingHandlers.nano = {
-	init: (element) => {
-		const Globals = require('Common/Globals'),
-			Settings = require('Storage/Settings');
-
-		if (!Globals.bDisableNanoScroll && !Settings.appSettingsGet('useNativeScrollbars')) {
-			$(element)
-				.addClass('nano')
-				.nanoScroller({
-					iOSNativeScrolling: false,
-					preventPageScrolling: true
-				});
-		}
-	}
+    init: (element) => {
+        $(element).addClass('nano rainloop-native-scroller');
+        if ($(element).css('position') === 'static') $(element).css('position', 'relative');
+    }
 };
 
 ko.bindingHandlers.saveTrigger = {

@@ -5,7 +5,8 @@ import key from 'key';
 
 import { inArray, pString, log, isUnd, trim, defautOptionsAfterRender } from 'Common/Utils';
 
-import { Magics, KeyState } from 'Common/Enums';
+import { KeyState } from 'Common/Enums';
+import { unlockPrivateKey, composePgpMessage } from 'Common/OpenPgp';
 import { i18n } from 'Common/Translator';
 
 import PgpStore from 'Stores/User/Pgp';
@@ -110,7 +111,7 @@ class ComposeOpenPgpPopupView extends AbstractViewNext {
 	}
 
 	@command((self) => !self.submitRequest() && (self.sign() || self.encrypt()))
-	doCommand() {
+	async doCommand() {
 		let result = true,
 			privateKey = null,
 			aPublicKeys = [];
@@ -137,7 +138,7 @@ class ComposeOpenPgpPopupView extends AbstractViewNext {
 
 				try {
 					if (privateKey) {
-						privateKey.decrypt(pString(this.password()));
+						privateKey = await unlockPrivateKey(PgpStore.openpgp, privateKey, pString(this.password()));
 					}
 				} catch (e) {
 					privateKey = null;
@@ -178,65 +179,17 @@ class ComposeOpenPgpPopupView extends AbstractViewNext {
 		}
 
 		if (result && this.resultCallback) {
-			_.delay(() => {
-				let pgpPromise = null;
-
-				try {
-					if (privateKey && 0 === aPublicKeys.length) {
-						pgpPromise = PgpStore.openpgp.sign({
-							data: this.text(),
-							privateKeys: [privateKey]
-						});
-					} else if (privateKey && 0 < aPublicKeys.length) {
-						pgpPromise = PgpStore.openpgp.encrypt({
-							data: this.text(),
-							publicKeys: aPublicKeys,
-							privateKeys: [privateKey]
-						});
-					} else if (!privateKey && 0 < aPublicKeys.length) {
-						pgpPromise = PgpStore.openpgp.encrypt({
-							data: this.text(),
-							publicKeys: aPublicKeys
-						});
-					}
-				} catch (e) {
-					log(e);
-
-					this.notification(
-						i18n('PGP_NOTIFICATIONS/PGP_ERROR', {
-							'ERROR': '' + e
-						})
-					);
-				}
-
-				if (pgpPromise) {
-					try {
-						pgpPromise
-							.then((mData) => {
-								this.resultCallback(mData.data);
-								this.cancelCommand();
-							})
-							.catch((e) => {
-								this.notification(
-									i18n('PGP_NOTIFICATIONS/PGP_ERROR', {
-										'ERROR': '' + e
-									})
-								);
-							});
-					} catch (e) {
-						this.notification(
-							i18n('PGP_NOTIFICATIONS/PGP_ERROR', {
-								'ERROR': '' + e
-							})
-						);
-					}
-				}
-
-				this.submitRequest(false);
-			}, Magics.Time20ms);
-		} else {
-			this.submitRequest(false);
+			try {
+				const text = await composePgpMessage(PgpStore.openpgp, this.text(), aPublicKeys, privateKey);
+				this.resultCallback(text);
+				this.password('');
+				this.cancelCommand();
+			} catch (e) {
+				log(e);
+				this.notification(i18n('PGP_NOTIFICATIONS/PGP_ERROR', { 'ERROR': '' + e }));
+			}
 		}
+		this.submitRequest(false);
 
 		return result;
 	}

@@ -49,6 +49,8 @@ class Manager
 	 */
 	private $aAdditionalAjax;
 
+	private $aAjaxFilters;
+
 	/**
 	 * @var array
 	 */

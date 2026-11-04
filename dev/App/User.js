@@ -1,4 +1,5 @@
 import window from 'window';
+import { wakeUp } from 'Common/Timers';
 import _ from '_';
 import $ from '$';
 import progressJs from 'progressJs';
@@ -37,6 +38,7 @@ import {
 import { $html, leftPanelWidth, leftPanelDisabled, bAnimationSupported, bMobileDevice } from 'Common/Globals';
 
 import { UNUSED_OPTION_VALUE } from 'Common/Consts';
+import { OpenPgpKeyring, describePgpKey } from 'Common/OpenPgp';
 import { runHook } from 'Common/Plugins';
 import { momentNowUnix, reload as momentReload } from 'Common/Momentor';
 
@@ -51,16 +53,7 @@ import {
 	storeMessageFlagsToCacheByFolderAndUid
 } from 'Common/Cache';
 
-import {
-	userBackground,
-	mailBox,
-	root,
-	openPgpWorkerJs,
-	openPgpJs,
-	socialGoogle,
-	socialTwitter,
-	socialFacebook
-} from 'Common/Links';
+import { userBackground, mailBox, root, openPgpJs, socialGoogle, socialTwitter, socialFacebook } from 'Common/Links';
 
 import * as Events from 'Common/Events';
 
@@ -128,7 +121,7 @@ class AppUser extends AbstractApp {
 			Magics.Time5m
 		);
 
-		$.wakeUp(
+		wakeUp(
 			() => {
 				if (checkTimestamp()) {
 					this.reload();
@@ -460,59 +453,45 @@ class AppUser extends AbstractApp {
 			);
 	}
 
-	reloadOpenPgpKeys() {
+	async reloadOpenPgpKeys() {
 		if (PgpStore.capaOpenPGP()) {
 			const keys = [],
 				email = new EmailModel(),
-				openpgpKeyring = PgpStore.openpgpKeyring,
-				openpgpKeys = openpgpKeyring ? openpgpKeyring.getAllKeys() : [];
-
-			_.each(openpgpKeys, (oItem, iIndex) => {
-				if (oItem && oItem.primaryKey) {
-					const aEmails = [],
-						aUsers = [],
-						primaryUser = oItem.getPrimaryUser(),
-						user =
-							primaryUser && primaryUser.user
-								? primaryUser.user.userId.userid
-								: oItem.users && oItem.users[0]
-								? oItem.users[0].userId.userid
-								: '';
-
-					if (oItem.users) {
-						_.each(oItem.users, (item) => {
-							if (item.userId) {
-								email.clear();
-								email.parse(item.userId.userid);
-								if (email.validate()) {
-									aEmails.push(email.email);
-									aUsers.push(item.userId.userid);
-								}
-							}
-						});
+				keyring = PgpStore.openpgpKeyring;
+			for (const [index, key] of (keyring ? keyring.getAllKeys() : []).entries()) {
+				try {
+					const users = [],
+						emails = [],
+						description = await describePgpKey(key),
+						user = description.user;
+					for (const userID of description.userIDs) {
+						email.clear();
+						email.parse(userID);
+						if (email.validate()) {
+							emails.push(email.email);
+							users.push(userID);
+						}
 					}
-
-					if (aEmails.length) {
+					if (emails.length) {
 						keys.push(
 							new OpenPgpKeyModel(
-								iIndex,
-								oItem.primaryKey.getFingerprint(),
-								oItem.primaryKey
-									.getKeyId()
-									.toHex()
-									.toLowerCase(),
-								_.uniq(_.compact(_.map(oItem.getKeyIds(), (item) => (item && item.toHex ? item.toHex() : null)))),
-								aUsers,
-								aEmails,
-								oItem.isPrivate(),
-								oItem.armor(),
-								user
+								index,
+								description.fingerprint,
+								description.id,
+								description.ids,
+								users,
+								emails,
+								key.isPrivate(),
+								key.armor(),
+								user,
+								key
 							)
 						);
 					}
+				} catch (e) {
+					log(e);
 				}
-			});
-
+			}
 			delegateRunOnDestroy(PgpStore.openpgpkeys());
 			PgpStore.openpgpkeys(keys);
 		}
@@ -1237,24 +1216,19 @@ class AppUser extends AbstractApp {
 							routeOn();
 						}
 
-						if (jassl && window.crypto && window.crypto.getRandomValues && Settings.capa(Capa.OpenPGP)) {
-							const openpgpCallback = (openpgp) => {
-								PgpStore.openpgp = openpgp;
-
-								if (window.Worker) {
-									try {
-										PgpStore.openpgp.initWorker({ path: openPgpWorkerJs() });
-									} catch (e) {
-										log(e);
-									}
+						if (jassl && window.crypto && window.crypto.subtle && Settings.capa(Capa.OpenPGP)) {
+							const openpgpCallback = async (openpgp) => {
+								try {
+									const keyring = await new OpenPgpKeyring(openpgp, window.localStorage).load();
+									PgpStore.openpgp = openpgp;
+									PgpStore.openpgpKeyring = keyring;
+									PgpStore.capaOpenPGP(true);
+									await this.reloadOpenPgpKeys();
+									Events.pub('openpgp.init');
+								} catch (e) {
+									PgpStore.capaOpenPGP(false);
+									log(e);
 								}
-
-								PgpStore.openpgpKeyring = new openpgp.Keyring();
-								PgpStore.capaOpenPGP(true);
-
-								Events.pub('openpgp.init');
-
-								this.reloadOpenPgpKeys();
 							};
 
 							if (window.openpgp) {

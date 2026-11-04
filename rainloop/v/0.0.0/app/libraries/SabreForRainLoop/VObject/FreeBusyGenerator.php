@@ -60,7 +60,7 @@ class FreeBusyGenerator {
      * @param mixed $objects
      * @return void
      */
-    public function __construct(\DateTime $start = null, \DateTime $end = null, $objects = null) {
+    public function __construct(?\DateTime $start = null, ?\DateTime $end = null, $objects = null) {
 
         if ($start && $end) {
             $this->setTimeRange($start, $end);
@@ -129,7 +129,7 @@ class FreeBusyGenerator {
      * @param DateTime $end
      * @return void
      */
-    public function setTimeRange(\DateTime $start = null, \DateTime $end = null) {
+    public function setTimeRange(?\DateTime $start = null, ?\DateTime $end = null) {
 
         $this->start = $start;
         $this->end = $end;

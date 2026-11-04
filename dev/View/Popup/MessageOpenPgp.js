@@ -1,10 +1,12 @@
-import _ from '_';
 import ko from 'ko';
 import key from 'key';
 import $ from '$';
 
 import { pString, log } from 'Common/Utils';
-import { KeyState, Magics } from 'Common/Enums';
+import { unlockPrivateKey } from 'Common/OpenPgp';
+import { i18n } from 'Common/Translator';
+import PgpStore from 'Stores/User/Pgp';
+import { KeyState } from 'Common/Enums';
 
 import { popup, command } from 'Knoin/Knoin';
 import { AbstractViewNext } from 'Knoin/AbstractViewNext';
@@ -34,41 +36,25 @@ class MessageOpenPgpPopupView extends AbstractViewNext {
 	}
 
 	@command((self) => !self.submitRequest())
-	doCommand() {
+	async doCommand() {
 		this.submitRequest(true);
-
-		_.delay(() => {
-			let privateKey = null;
-
-			try {
-				if (this.resultCallback && this.selectedKey()) {
-					const privateKeys = this.selectedKey().getNativeKeys();
-					privateKey = privateKeys && privateKeys[0] ? privateKeys[0] : null;
-
-					if (privateKey) {
-						try {
-							if (!privateKey.decrypt(pString(this.password()))) {
-								log('Error: Private key cannot be decrypted');
-								privateKey = null;
-							}
-						} catch (e) {
-							log(e);
-							privateKey = null;
-						}
-					} else {
-						log('Error: Private key cannot be found');
-					}
+		const callback = this.resultCallback,
+			selectedKey = this.selectedKey();
+		try {
+			if (callback && selectedKey) {
+				const key = await unlockPrivateKey(PgpStore.openpgp, selectedKey.getNativeKey(), pString(this.password()));
+				if (this.resultCallback === callback) {
+					this.password('');
+					this.cancelCommand();
+					callback(key);
 				}
-			} catch (e) {
-				log(e);
-				privateKey = null;
 			}
-
+		} catch (e) {
+			log(e);
+			this.notification(i18n('PGP_NOTIFICATIONS/DECRYPTION_ERROR'));
+		} finally {
 			this.submitRequest(false);
-
-			this.cancelCommand();
-			this.resultCallback(privateKey);
-		}, Magics.Time100ms);
+		}
 	}
 
 	clearPopup() {

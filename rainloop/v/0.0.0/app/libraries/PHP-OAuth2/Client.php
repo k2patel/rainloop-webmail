@@ -14,6 +14,8 @@
  * See the GNU Lesser General Public License for more details.
  */
 
+/* Modified by the maintained RainLoop fork on 2026-11-03: PHP 8 compatibility and verified TLS. */
+
 /**
  * Light PHP wrapper for the OAuth 2.0 protocol.
  *
@@ -440,18 +442,14 @@ class Client
 
         $ch = curl_init();
         curl_setopt_array($ch, $curl_options);
-        // https handling
-        if (!empty($this->certificate_file)) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_CAINFO, $this->certificate_file);
-        } else {
-            // bypass ssl verification
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        }
         if (!empty($this->curl_options)) {
             curl_setopt_array($ch, $this->curl_options);
+        }
+        // Always authenticate TLS peers, including when the system CA store is used.
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        if (!empty($this->certificate_file)) {
+            curl_setopt($ch, CURLOPT_CAINFO, $this->certificate_file);
         }
         $result = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -461,7 +459,7 @@ class Client
         } else {
             $json_decode = json_decode($result, true);
         }
-        curl_close($ch);
+        $ch = null;
 
         return array(
             'result' => (null === $json_decode) ? $result : $json_decode,

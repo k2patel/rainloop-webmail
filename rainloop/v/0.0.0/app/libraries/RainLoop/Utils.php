@@ -118,7 +118,7 @@ class Utils
 		{
 			$oPrivKey  = \openssl_pkey_get_private($sPrivateKey);
 
-			$aString = @\unserialize($sString);
+			$aString = @\unserialize($sString, array('allowed_classes' => false));
 			if (\is_array($aString))
 			{
 				if ($sKey === \array_pop($aString))
@@ -220,7 +220,7 @@ class Utils
 	{
 		$aResult = @\unserialize(
 			\RainLoop\Utils::DecryptString(
-				\MailSo\Base\Utils::UrlSafeBase64Decode($sEncodedValues), \md5(APP_SALT.$sCustomKey)));
+				\MailSo\Base\Utils::UrlSafeBase64Decode($sEncodedValues), \md5(APP_SALT.$sCustomKey)), array('allowed_classes' => false));
 
 		return \is_array($aResult) ? $aResult : array();
 	}
@@ -248,7 +248,7 @@ class Utils
 	{
 		$aResult = @\unserialize(
 			\RainLoop\Utils::DecryptStringQ(
-				\MailSo\Base\Utils::UrlSafeBase64Decode($sEncodedValues), \md5(APP_SALT.$sCustomKey)));
+				\MailSo\Base\Utils::UrlSafeBase64Decode($sEncodedValues), \md5(APP_SALT.$sCustomKey)), array('allowed_classes' => false));
 
 		return \is_array($aResult) ? $aResult : array();
 	}

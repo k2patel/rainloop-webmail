@@ -56,7 +56,7 @@ class GD extends PHPThumb
      *
      * @var array
      */
-    protected $options;
+    protected $options = array();
 
     /**
      * The maximum width an image can be after resizing (in pixels)
@@ -106,7 +106,7 @@ class GD extends PHPThumb
                 break;
         }
 
-		if (!is_resource($this->oldImage))
+		if (!($this->oldImage instanceof \GdImage) && !is_resource($this->oldImage))
 		{
 			throw new \Exception('Invalid image file');
 		}
@@ -121,12 +121,12 @@ class GD extends PHPThumb
 
     public function __destruct()
     {
-        if (is_resource($this->oldImage)) {
-            imagedestroy($this->oldImage);
+        if ($this->oldImage instanceof \GdImage || is_resource($this->oldImage)) {
+            $this->oldImage = null;
         }
 
-        if (is_resource($this->workingImage)) {
-            imagedestroy($this->workingImage);
+        if ($this->workingImage instanceof \GdImage || is_resource($this->workingImage)) {
+            $this->workingImage = null;
         }
     }
 

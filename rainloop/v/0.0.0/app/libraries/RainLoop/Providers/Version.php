@@ -4,6 +4,8 @@ namespace RainLoop\Providers;
 
 class Version
 {
+	private $oConfig;
+	private $oLogger;
 	/**
 	 * @return void
 	 */

@@ -59,6 +59,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      *
      * @return ElementList
      */
+    #[\ReturnTypeWillChange]
     public function getIterator() {
 
         if (!is_null($this->iterator))
@@ -114,6 +115,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count() {
 
         $it = $this->getIterator();
@@ -134,6 +136,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      * @param int $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) {
 
         $iterator = $this->getIterator();
@@ -149,6 +152,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      * @param int $offset
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
 
         $iterator = $this->getIterator();
@@ -165,6 +169,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      * @param mixed $value
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset,$value) {
 
         $iterator = $this->getIterator();
@@ -185,6 +190,7 @@ abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable {
      * @param int $offset
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset) {
 
         $iterator = $this->getIterator();

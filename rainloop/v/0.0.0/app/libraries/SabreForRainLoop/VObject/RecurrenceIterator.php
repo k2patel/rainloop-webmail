@@ -479,6 +479,7 @@ class RecurrenceIterator implements \Iterator {
      *
      * @return DateTime
      */
+    #[\ReturnTypeWillChange]
     public function current() {
 
         if (!$this->valid()) return null;
@@ -552,6 +553,7 @@ class RecurrenceIterator implements \Iterator {
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function key() {
 
         return $this->counter;
@@ -563,6 +565,7 @@ class RecurrenceIterator implements \Iterator {
      *
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function valid() {
 
         if (!is_null($this->count)) {
@@ -590,6 +593,7 @@ class RecurrenceIterator implements \Iterator {
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function rewind() {
 
         $this->currentDate = clone $this->startDate;
@@ -632,6 +636,7 @@ class RecurrenceIterator implements \Iterator {
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function next() {
 
         $previousStamp = $this->currentDate->getTimeStamp();

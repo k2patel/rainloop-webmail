@@ -16,6 +16,7 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 	constructor() {
 		super();
 
+		this.importing = ko.observable(false);
 		this.key = ko.observable('');
 		this.key.focus = ko.observable(false);
 		this.key.error = ko.observable(false);
@@ -27,8 +28,8 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 		});
 	}
 
-	@command()
-	addOpenPgpKeyCommand() {
+	@command((self) => !self.importing())
+	async addOpenPgpKeyCommand() {
 		// eslint-disable-next-line max-len
 		const reg = /[-]{3,6}BEGIN[\s]PGP[\s](PRIVATE|PUBLIC)[\s]KEY[\s]BLOCK[-]{3,6}[\s\S]+?[-]{3,6}END[\s]PGP[\s](PRIVATE|PUBLIC)[\s]KEY[\s]BLOCK[-]{3,6}/gi,
 			openpgpKeyring = PgpStore.openpgpKeyring;
@@ -46,8 +47,10 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 			return false;
 		}
 
+		this.importing(true);
 		let match = null,
 			count = 30,
+			imported = false,
 			done = false;
 
 		do {
@@ -56,9 +59,17 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 				if (match[0] && match[1] && match[2] && match[1] === match[2]) {
 					let err = null;
 					if ('PRIVATE' === match[1]) {
-						err = openpgpKeyring.privateKeys.importKey(match[0]);
+						try {
+							await openpgpKeyring.privateKeys.importKey(match[0]);
+						} catch (e) {
+							err = [e.message];
+						}
 					} else if ('PUBLIC' === match[1]) {
-						err = openpgpKeyring.publicKeys.importKey(match[0]);
+						try {
+							await openpgpKeyring.publicKeys.importKey(match[0]);
+						} catch (e) {
+							err = [e.message];
+						}
 					}
 
 					if (err) {
@@ -68,6 +79,7 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 					}
 				}
 
+				imported = true;
 				count -= 1;
 				done = false;
 			} else {
@@ -75,11 +87,17 @@ class AddOpenPgpKeyPopupView extends AbstractViewNext {
 			}
 		} while (!done);
 
-		openpgpKeyring.store();
+		try {
+			openpgpKeyring.store();
+			await getApp().reloadOpenPgpKeys();
+		} catch (e) {
+			this.key.error(true);
+			this.key.errorMessage(e.message);
+		}
 
-		getApp().reloadOpenPgpKeys();
-
-		if (this.key.error()) {
+		this.importing(false);
+		if (!imported || this.key.error()) {
+			this.key.error(true);
 			return false;
 		}
 

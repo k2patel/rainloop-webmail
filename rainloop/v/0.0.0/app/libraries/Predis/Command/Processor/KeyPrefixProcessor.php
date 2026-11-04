@@ -351,7 +351,7 @@ class KeyPrefixProcessor implements ProcessorInterface
                             }
                             break;
 
-                        case 'LIMIT';
+                        case 'LIMIT':
                             $i += 2;
                             break;
                     }

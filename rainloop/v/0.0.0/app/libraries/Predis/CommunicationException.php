@@ -32,7 +32,7 @@ abstract class CommunicationException extends PredisException
         NodeConnectionInterface $connection,
         $message = null,
         $code = null,
-        \Exception $innerException = null
+        ?\Exception $innerException = null
     ) {
         parent::__construct($message, $code, $innerException);
         $this->connection = $connection;

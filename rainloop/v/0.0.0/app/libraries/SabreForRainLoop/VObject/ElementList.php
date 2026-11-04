@@ -46,6 +46,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return Element
      */
+    #[\ReturnTypeWillChange]
     public function current() {
 
         return $this->elements[$this->key];
@@ -57,6 +58,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function next() {
 
         $this->key++;
@@ -68,6 +70,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function key() {
 
         return $this->key;
@@ -79,6 +82,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function valid() {
 
         return isset($this->elements[$this->key]);
@@ -90,6 +94,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function rewind() {
 
         $this->key = 0;
@@ -105,6 +110,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count() {
 
         return count($this->elements);
@@ -122,6 +128,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      * @param int $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) {
 
         return isset($this->elements[$offset]);
@@ -134,6 +141,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      * @param int $offset
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
 
         return $this->elements[$offset];
@@ -147,6 +155,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      * @param mixed $value
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset,$value) {
 
         throw new \LogicException('You can not add new objects to an ElementList');
@@ -161,6 +170,7 @@ class ElementList implements \Iterator, \Countable, \ArrayAccess {
      * @param int $offset
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset) {
 
         throw new \LogicException('You can not remove objects from an ElementList');

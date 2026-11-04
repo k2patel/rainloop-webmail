@@ -43,7 +43,7 @@ final class Imagine extends AbstractImagine
     /**
      * {@inheritdoc}
      */
-    public function create(BoxInterface $size, ColorInterface $color = null)
+    public function create(BoxInterface $size, ?ColorInterface $color = null)
     {
         $width  = $size->getWidth();
         $height = $size->getHeight();
@@ -92,7 +92,7 @@ final class Imagine extends AbstractImagine
 
         $resource = @imagecreatefromstring($data);
 
-        if (!is_resource($resource)) {
+        if (!($resource instanceof \GdImage) && !is_resource($resource)) {
             throw new RuntimeException(sprintf('Unable to open image %s', $path));
         }
 
@@ -112,7 +112,7 @@ final class Imagine extends AbstractImagine
      */
     public function read($resource)
     {
-        if (!is_resource($resource)) {
+        if (!($resource instanceof \GdImage) && !is_resource($resource)) {
             throw new InvalidArgumentException('Variable does not contain a stream resource');
         }
 
@@ -151,7 +151,7 @@ final class Imagine extends AbstractImagine
 
             imagecopymerge($truecolor, $resource, 0, 0, 0, 0, $width, $height, 100);
 
-            imagedestroy($resource);
+            $resource = null;
             $resource = $truecolor;
         }
 
@@ -186,7 +186,7 @@ final class Imagine extends AbstractImagine
     {
         $resource = @imagecreatefromstring($string);
 
-        if (!is_resource($resource)) {
+        if (!($resource instanceof \GdImage) && !is_resource($resource)) {
             throw new RuntimeException('An image could not be created from the given input');
         }
 

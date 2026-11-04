@@ -1,6 +1,6 @@
 /* RainLoop Webmail (c) RainLoop Team | Licensed under MIT */
 const path = require('path');
-const { argv } = require('yargs');
+
 
 const config = {
 	head: {
@@ -8,7 +8,7 @@ const config = {
 	},
 	devVersion: '0.0.0',
 	releasesPath: 'build/dist/releases',
-	source: !!argv.source,
+	source: false,
 	watch: false,
 	watchInterval: 1000,
 	googleCompile: false,
@@ -48,17 +48,18 @@ config.paths.css = {
 		name: 'app.css',
 		src: [
 			'node_modules/normalize.css/normalize.css',
-			'vendors/jquery-ui/css/smoothness/jquery-ui-1.10.3.custom.css',
+			'node_modules/jquery-ui/themes/base/core.css',
+			'node_modules/jquery-ui/themes/base/sortable.css',
+			'node_modules/jquery-ui/themes/base/menu.css',
+			'node_modules/jquery-ui/themes/base/autocomplete.css',
+			'node_modules/jquery-ui/themes/base/theme.css',
 			'vendors/fontastic/styles.css',
-			'vendors/jquery-nanoscroller/nanoscroller.css',
-			'vendors/jquery-letterfx/jquery-letterfx.min.css',
 			'vendors/inputosaurus/inputosaurus.css',
 			'vendors/flags/flags-fixed.css',
 			'node_modules/opentip/css/opentip.css',
 			'node_modules/pikaday/css/pikaday.css',
-			'vendors/lightgallery/dist/css/lightgallery.min.css',
-			'vendors/lightgallery/dist/css/lg-transitions.min.css',
-			'vendors/Progress.js/minified/progressjs.min.css',
+			'node_modules/glightbox/dist/css/glightbox.min.css',
+			'node_modules/jodit/es2021/jodit.min.css',
 			'dev/Styles/_progressjs.css'
 		]
 	},
@@ -80,34 +81,25 @@ config.paths.js = {
 			'node_modules/jquery-mousewheel/jquery.mousewheel.js',
 			'node_modules/jquery-scrollstop/jquery.scrollstop.js',
 			'node_modules/jquery-backstretch/jquery.backstretch.min.js',
-			'vendors/jquery-ui/js/jquery-ui-1.10.3.custom.min.js', // custom
-			'vendors/jquery-nanoscroller/jquery.nanoscroller.js', // custom (modified)
-			'vendors/jquery-wakeup/jquery.wakeup.js', // no-npm
-			'vendors/jquery-letterfx/jquery-letterfx.min.js', // no-npm
+			...[ 'version', 'widget', 'data', 'disable-selection', 'focusable', 'keycode', 'labels', 'plugin', 'position', 'scroll-parent', 'tabbable', 'unique-id', 'widgets/mouse', 'widgets/draggable', 'widgets/droppable', 'widgets/sortable', 'widgets/menu', 'widgets/autocomplete' ].map((name) => 'node_modules/jquery-ui/ui/' + name + '.js'),
 			'vendors/inputosaurus/inputosaurus.js', // custom (modified)
-			'vendors/routes/signals.min.js', // fixed
-			'vendors/routes/hasher.min.js', // fixed
-			'vendors/routes/crossroads.min.js', // fixed
-			'vendors/jua/jua.min.js', // custom
-			'vendors/keymaster/keymaster.js', // custom (modified)
-			'vendors/qr.js/qr.min.js', // fixed (license)
-			'vendors/bootstrap/js/bootstrap.min.js', // fixed
+			'node_modules/signals/dist/signals.min.js', // fixed
+			'node_modules/hasher/dist/js/hasher.min.js', // fixed
+			'node_modules/crossroads/dist/crossroads.min.js', // fixed
+			'vendors/jua/jua.js', // custom
+			'node_modules/keymaster/keymaster.js',
+			'dev/External/Keymaster.js',
+			'dev/External/LegacyUi.js',
 			'node_modules/underscore/underscore-min.js',
 			'node_modules/moment/min/moment.min.js',
 			'node_modules/knockout/build/output/knockout-latest.js',
 			'node_modules/knockout-sortable/build/knockout-sortable.min.js ',
-			'node_modules/matchmedia-polyfill/matchMedia.js',
-			'node_modules/matchmedia-polyfill/matchMedia.addListener.js',
 			'node_modules/simplestatemanager/dist/ssm.min.js',
 			'node_modules/autolinker/dist/Autolinker.min.js',
 			'node_modules/opentip/lib/opentip.js',
 			'node_modules/opentip/lib/adapter-jquery.js',
-			'vendors/lightgallery/dist/js/lightgallery.min.js', // license
-			'vendors/lightgallery/dist/js/lg-fullscreen.min.js',
-			'vendors/lightgallery/dist/js/lg-thumbnail.min.js',
-			'vendors/lightgallery/dist/js/lg-zoom.min.js',
-			'vendors/lightgallery/dist/js/lg-autoplay.min.js',
-			'node_modules/ifvisible.js/src/ifvisible.min.js'
+			'node_modules/glightbox/dist/js/glightbox.min.js',
+			'node_modules/ifvisible.js/dist/ifvisible.global.js'
 		]
 	},
 	app: {

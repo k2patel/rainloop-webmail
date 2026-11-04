@@ -21,14 +21,14 @@ status:
 	@docker compose ps
 
 tx:
-	@docker compose run --no-deps --rm tx tx pull -a -s -f -d
+	@docker compose run --no-deps --rm tx pull -a -s -f -d
 
 console-node:
 	@docker compose run --no-deps --rm node sh
 console-tx:
-	@docker compose run --no-deps --rm tx sh
+	@docker compose run --no-deps --rm tx --help
 console-php:
-	@docker compose exec php sh
+	@docker compose exec php /usr/local/bin/php -a
 console: console-node
 
 logs:
@@ -47,30 +47,28 @@ logs-tx:
 	@docker compose logs --tail=100 -f tx
 
 rl-lint:
-	@docker compose run --no-deps --rm node gulp lint
+	@docker compose run --no-deps --rm node yarn lint
 rl-dev:
 	@docker compose run --no-deps --rm node npm run watch-js
 rl-compile:
-	@docker compose run --no-deps --rm node gulp build
+	@docker compose run --no-deps --rm node yarn build:frontend
 rl-compile-with-source:
-	@docker compose run --no-deps --rm node gulp build --source
+	@docker compose run --no-deps --rm node yarn build:frontend
 rl-watch-css:
 	@docker compose run --no-deps --rm node npm run watch-css
 rl-watch-js:
 	@docker compose run --no-deps --rm node npm run watch-js
 
 rl-build:
-	@docker compose run --no-deps --rm node gulp all
+	@docker compose run --no-deps --rm node yarn build
 
 yarn-install:
-	@docker compose run --no-deps --rm node yarn install
+	@docker compose run --no-deps --rm node yarn install --frozen-lockfile --ignore-scripts
 yarn-outdated:
 	@docker compose run --no-deps --rm node yarn outdated
 yarn-upgrade:
 	@docker compose run --no-deps --rm node yarn upgrade-interactive --exact --latest
 
+# Signing uses the maintainer's configured local GPG environment.
 gpg:
-	docker run -it --rm -w=/var/www \
-		-v $(shell pwd)/.docker/.cache/.gnupg:/root/.gnupg \
-		-v $(shell pwd):/var/www \
-		ubuntu:16.04 bash
+	@echo "Sign reviewed release artifacts with your own local GPG key."

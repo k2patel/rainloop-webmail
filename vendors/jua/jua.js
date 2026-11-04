@@ -470,8 +470,8 @@
 		 */
 		Utils.getStringOrCallFunction = function (mStringOrFunction, aFunctionParams)
 		{
-			return $.isFunction(mStringOrFunction) ?
-				mStringOrFunction.apply(null, $.isArray(aFunctionParams) ? aFunctionParams : []).toString() :
+			return (typeof mStringOrFunction === 'function') ?
+				mStringOrFunction.apply(null, Array.isArray(aFunctionParams) ? aFunctionParams : []).toString() :
 				mStringOrFunction.toString();
 		};
 
@@ -594,7 +594,7 @@
 
 							try
 							{
-								oResult = $.parseJSON(oXhr.responseText);
+								oResult = JSON.parse(oXhr.responseText);
 								bResult = true;
 							}
 							catch (oException)
@@ -824,7 +824,7 @@
 						try
 						{
 							oIframeDoc = this.contentDocument ? this.contentDocument: this.contentWindow.document;
-							oResult = $.parseJSON(oIframeDoc.body.innerHTML);
+							oResult = JSON.parse(oIframeDoc.body.innerHTML);
 							bResult = true;
 						}
 						catch (oErr)

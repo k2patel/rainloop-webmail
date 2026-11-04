@@ -1466,6 +1466,7 @@ class ComposePopupView extends AbstractViewNext {
 				oJua = new Jua({
 					'action': upload(),
 					'name': 'uploader',
+					'hidden': { XToken: () => Settings.appSettingsGet('token') },
 					'queueSize': 2,
 					'multipleSizeLimit': 50,
 					'clickElement': this.composeUploaderButton(),

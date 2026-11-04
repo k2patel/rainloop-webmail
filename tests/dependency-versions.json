@@ -1,0 +1,682 @@
+[
+  {
+    "name": "@babel/core",
+    "previous": "7.14.0",
+    "version": "8.1.0",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "@babel/plugin-proposal-class-properties",
+    "previous": "7.13.0",
+    "version": "7.18.6",
+    "engines": {
+      "node": ">=6.9.0"
+    },
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "@babel/plugin-proposal-decorators",
+    "previous": "7.13.15",
+    "version": "8.0.2",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "@babel/plugin-transform-runtime",
+    "previous": "7.13.15",
+    "version": "8.0.6",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "@babel/preset-env",
+    "previous": "7.14.1",
+    "version": "8.0.7",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "@babel/runtime-corejs3",
+    "previous": "7.14.0",
+    "version": "8.1.0",
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "autolinker",
+    "previous": "3.14.3",
+    "version": "4.1.5",
+    "engines": {
+      "pnpm": ">=10.10.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "babel-eslint",
+    "previous": "10.1.0",
+    "version": "10.1.0",
+    "engines": {
+      "node": ">=6"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "babel-loader",
+    "previous": "8.2.2",
+    "version": "10.1.1",
+    "engines": {
+      "node": "^18.20.0 || ^20.10.0 || >=22.0.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "classnames",
+    "previous": "2.3.1",
+    "version": "2.5.1",
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "copy-webpack-plugin",
+    "previous": "5.1.1",
+    "version": "14.0.0",
+    "engines": {
+      "node": ">= 20.9.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "core-js",
+    "previous": "3.12.0",
+    "version": "3.51.0",
+    "engines": {
+      "node": "*"
+    },
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "css-loader",
+    "previous": "3.4.2",
+    "version": "7.1.5",
+    "engines": {
+      "node": ">= 18.12.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "element-dataset",
+    "previous": "2.2.6",
+    "version": "2.2.6",
+    "license": "BSD-3-Clause"
+  },
+  {
+    "name": "emailjs-addressparser",
+    "previous": "2.0.2",
+    "version": "2.0.3",
+    "license": "MIT"
+  },
+  {
+    "name": "eslint",
+    "previous": "6.8.0",
+    "version": "10.14.0",
+    "engines": {
+      "node": "^20.19.0 || ^22.13.0 || >=24"
+    },
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "eslint-config-prettier",
+    "previous": "6.10.0",
+    "version": "10.1.8",
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "eslint-plugin-prettier",
+    "previous": "3.1.2",
+    "version": "5.5.7",
+    "engines": {
+      "node": "^14.18.0 || >=16.0.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp",
+    "previous": "4.0.2",
+    "version": "5.0.1",
+    "engines": {
+      "node": ">=10.13.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-autoprefixer",
+    "previous": "7.0.1",
+    "version": "10.0.0",
+    "engines": {
+      "node": ">=20"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "gulp-cached",
+    "previous": "1.1.1",
+    "version": "1.1.1",
+    "engines": {
+      "node": ">= 0.9.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-chmod",
+    "previous": "3.0.0",
+    "version": "4.0.0",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "gulp-clean-css",
+    "previous": "4.3.0",
+    "version": "4.3.0",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-concat-util",
+    "previous": "0.5.5",
+    "version": "0.5.5",
+    "engines": {
+      "node": ">= 0.8.0"
+    }
+  },
+  {
+    "name": "gulp-eol",
+    "previous": "0.2.0",
+    "version": "0.2.0"
+  },
+  {
+    "name": "gulp-eslint",
+    "previous": "6.0.0",
+    "version": "6.0.0",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-expect-file",
+    "previous": "1.0.2",
+    "version": "3.0.0",
+    "engines": {
+      "node": ">=24.0.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-filter",
+    "previous": "7.0.0",
+    "version": "10.0.0",
+    "engines": {
+      "node": ">=22"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "gulp-header",
+    "previous": "2.0.9",
+    "version": "2.0.12",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-if",
+    "previous": "3.0.0",
+    "version": "3.0.0",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-less",
+    "previous": "4.0.1",
+    "version": "5.0.0",
+    "engines": {
+      "node": ">=6"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-livereload",
+    "previous": "4.0.2",
+    "version": "4.0.2",
+    "engines": {
+      "node": ">=6"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-plumber",
+    "previous": "1.2.1",
+    "version": "1.2.1",
+    "engines": {
+      "npm": ">=1.2.10",
+      "node": ">=0.10"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-rename",
+    "previous": "2.0.0",
+    "version": "2.1.0",
+    "engines": {
+      "node": ">=4"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-replace",
+    "previous": "1.1.3",
+    "version": "1.1.4",
+    "engines": {
+      "node": ">=10"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-rimraf",
+    "previous": "1.0.0",
+    "version": "1.0.0",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-size",
+    "previous": "4.0.0",
+    "version": "5.0.0",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "gulp-sourcemaps",
+    "previous": "3.0.0",
+    "version": "3.0.0",
+    "engines": {
+      "node": ">= 6"
+    },
+    "license": "ISC"
+  },
+  {
+    "name": "gulp-stripbom",
+    "previous": "1.0.5",
+    "version": "1.0.5",
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-terser",
+    "previous": "2.0.1",
+    "version": "2.1.0",
+    "engines": {
+      "node": ">=10"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-through",
+    "previous": "0.4.0",
+    "version": "0.4.0",
+    "engines": {
+      "node": ">= 0.8.0"
+    }
+  },
+  {
+    "name": "gulp-util",
+    "previous": "3.0.8",
+    "version": "3.0.8",
+    "engines": {
+      "node": ">=0.10"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "gulp-zip",
+    "previous": "5.1.0",
+    "version": "6.1.0",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "ifvisible.js",
+    "previous": "1.0.6",
+    "version": "3.0.0",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "intersection-observer",
+    "previous": "0.12.0",
+    "version": "0.12.2",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "jquery",
+    "previous": "3.6.0",
+    "version": "4.0.0",
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "jquery-backstretch",
+    "previous": "2.1.18",
+    "version": "2.1.18"
+  },
+  {
+    "name": "jquery-migrate",
+    "previous": "3.3.2",
+    "version": "4.0.2",
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "jquery-mousewheel",
+    "previous": "3.1.13",
+    "version": "3.2.2",
+    "license": "MIT"
+  },
+  {
+    "name": "jquery-scrollstop",
+    "previous": "1.2.0",
+    "version": "1.2.0",
+    "license": "Unlicense"
+  },
+  {
+    "name": "js-cookie",
+    "previous": "2.2.1",
+    "version": "3.0.8",
+    "license": "MIT"
+  },
+  {
+    "name": "json-loader",
+    "previous": "0.5.7",
+    "version": "0.5.7",
+    "license": "MIT"
+  },
+  {
+    "name": "json3",
+    "previous": "3.3.3",
+    "version": "3.3.3",
+    "license": "MIT"
+  },
+  {
+    "name": "knockout",
+    "previous": "3.5.1",
+    "version": "3.5.3",
+    "license": "MIT"
+  },
+  {
+    "name": "knockout-sortable",
+    "previous": "1.2.0",
+    "version": "1.3.0",
+    "license": "MIT"
+  },
+  {
+    "name": "lozad",
+    "previous": "1.16.0",
+    "version": "1.16.0",
+    "license": "MIT"
+  },
+  {
+    "name": "matchmedia-polyfill",
+    "previous": "0.3.2",
+    "version": "0.3.2",
+    "license": "MIT"
+  },
+  {
+    "name": "moment",
+    "previous": "2.31.0",
+    "version": "2.31.0",
+    "engines": {
+      "node": "*"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "node-fs",
+    "previous": "0.1.7",
+    "version": "0.1.7",
+    "engines": {
+      "node": ">=0.1.97"
+    }
+  },
+  {
+    "name": "normalize.css",
+    "previous": "8.0.1",
+    "version": "8.0.1",
+    "license": "MIT"
+  },
+  {
+    "name": "openpgp",
+    "previous": "6.3.2",
+    "version": "6.3.2",
+    "engines": {
+      "node": ">= 18.0.0",
+      "typescript": ">= 5.0.0"
+    },
+    "license": "LGPL-3.0+",
+    "type": "module"
+  },
+  {
+    "name": "opentip",
+    "previous": "2.4.3",
+    "version": "2.4.3"
+  },
+  {
+    "name": "pikaday",
+    "previous": "1.8.2",
+    "version": "1.8.2",
+    "license": "(0BSD OR MIT)"
+  },
+  {
+    "name": "prettier",
+    "previous": "1.19.1",
+    "version": "3.9.10",
+    "engines": {
+      "node": ">=14"
+    },
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "qrcode-generator",
+    "previous": "2.0.4",
+    "version": "2.0.4",
+    "license": "MIT"
+  },
+  {
+    "name": "raf",
+    "previous": "3.4.1",
+    "version": "3.4.1",
+    "license": "MIT"
+  },
+  {
+    "name": "raw-loader",
+    "previous": "4.0.2",
+    "version": "4.0.2",
+    "engines": {
+      "node": ">= 10.13.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "rimraf",
+    "previous": "3.0.2",
+    "version": "6.1.4",
+    "engines": {
+      "node": "20 || >=22"
+    },
+    "license": "BlueOak-1.0.0",
+    "type": "module"
+  },
+  {
+    "name": "simplestatemanager",
+    "previous": "4.1.1",
+    "version": "4.1.1",
+    "license": "MIT"
+  },
+  {
+    "name": "style-loader",
+    "previous": "1.1.3",
+    "version": "4.0.0",
+    "engines": {
+      "node": ">= 18.12.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "underscore",
+    "previous": "1.13.8",
+    "version": "1.13.8",
+    "license": "MIT",
+    "type": "commonjs"
+  },
+  {
+    "name": "webpack",
+    "previous": "4.42.0",
+    "version": "5.112.2",
+    "engines": {
+      "node": ">=10.13.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "webpack-cli",
+    "previous": "3.3.11",
+    "version": "7.3.1",
+    "engines": {
+      "node": ">=20.9.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "jquery-ui-dist",
+    "version": "1.13.3",
+    "license": "MIT"
+  },
+  {
+    "name": "jodit",
+    "version": "4.19.4",
+    "license": "MIT"
+  },
+  {
+    "name": "glightbox",
+    "version": "3.3.1",
+    "license": "MIT"
+  },
+  {
+    "name": "@babel/eslint-parser",
+    "version": "8.0.7",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "@babel/plugin-transform-class-properties",
+    "version": "8.0.1",
+    "engines": {
+      "node": "^22.18.0 || >=24.11.0"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "fancy-log",
+    "version": "2.0.0",
+    "engines": {
+      "node": ">=10.13.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "plugin-error",
+    "version": "2.0.1",
+    "engines": {
+      "node": ">=10.13.0"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "yargs",
+    "version": "18.2.0",
+    "engines": {
+      "node": "^20.19.0 || ^22.12.0 || >=23"
+    },
+    "license": "MIT",
+    "type": "module"
+  },
+  {
+    "name": "less",
+    "version": "4.9.1",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "Apache-2.0",
+    "type": "module"
+  },
+  {
+    "name": "autoprefixer",
+    "version": "10.6.2",
+    "engines": {
+      "node": "^10 || ^12 || >=14"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "postcss",
+    "version": "8.5.32",
+    "engines": {
+      "node": "^10 || ^12 || >=14"
+    },
+    "license": "MIT"
+  },
+  {
+    "name": "terser",
+    "version": "5.51.2",
+    "engines": {
+      "node": ">=10"
+    },
+    "license": "BSD-2-Clause",
+    "type": "module"
+  },
+  {
+    "name": "archiver",
+    "version": "8.0.0",
+    "engines": {
+      "node": ">=18"
+    },
+    "license": "MIT",
+    "type": "module"
+  }
+]

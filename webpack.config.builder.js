@@ -1,15 +1,16 @@
 const path = require('path');
 const webpack = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 
 const devPath = path.resolve(__dirname, 'dev');
 const devPathJoin = path.join(__dirname, 'dev');
 const externalPathJoin = path.join(__dirname, 'dev', 'External');
-const loose = true;
+
 
 const babelLoaderOptions = function() {
 	return {
 		ignore: [/\/core-js/],
+		assumptions: { setPublicClassFields: true },
 		cacheDirectory: true,
 		overrides: [
 			{
@@ -21,40 +22,27 @@ const babelLoaderOptions = function() {
 			[
 				'@babel/preset-env',
 				{
-					useBuiltIns: 'usage',
-					corejs: { version: 3, proposals: true },
-					loose: loose,
+					targets: { chrome: '100', firefox: '102', safari: '16' },
 					modules: false
 				}
 			]
 		],
 		plugins: [
 			[
-				'@babel/plugin-transform-runtime',
-				{
-					corejs: 3,
-					loose: loose,
-					useESModules: true
-				}
-			],
-			[
 				'@babel/plugin-proposal-decorators',
 				{
-					legacy: true,
-					loose: loose
+					version: 'legacy'
 				}
 			],
 			[
-				'@babel/plugin-proposal-class-properties',
+				'@babel/plugin-transform-class-properties',
 				{
-					loose: loose
 				}
 			]
 		]
 	};
 };
 
-process.noDeprecation = true;
 module.exports = function(publicPath, mode) {
 	return {
 		mode: mode || 'development',
@@ -85,11 +73,6 @@ module.exports = function(publicPath, mode) {
 					NODE_ENV: JSON.stringify('production')
 				}
 			}),
-			new webpack.DefinePlugin({}),
-			new CopyWebpackPlugin([
-				{ from: 'node_modules/openpgp/dist/openpgp.min.js', to: 'js/min/openpgp.min.js' },
-				{ from: 'node_modules/openpgp/dist/openpgp.worker.min.js', to: 'js/min/openpgp.worker.min.js' }
-			])
 		],
 		resolve: {
 			modules: [devPath, 'node_modules'],
@@ -109,17 +92,12 @@ module.exports = function(publicPath, mode) {
 				},
 				{
 					test: /\.html$/,
-					loader: 'raw-loader',
+					type: 'asset/source',
 					include: [devPath]
 				},
 				{
 					test: /\.css/,
-					loaders: ['style-loader', 'css-loader'],
-					include: [devPath]
-				},
-				{
-					test: /\.json$/,
-					loader: 'json-loader',
+					use: ['style-loader', 'css-loader'],
 					include: [devPath]
 				}
 			]
@@ -136,7 +114,6 @@ module.exports = function(publicPath, mode) {
 			'ssm': 'window.ssm',
 			'key': 'window.key',
 			'_': 'window._',
-			'qr': 'window.qr',
 			'$': 'window.jQuery'
 		}
 	};

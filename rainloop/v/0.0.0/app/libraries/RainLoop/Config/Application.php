@@ -120,7 +120,7 @@ class Application extends \RainLoop\Config\AbstractConfig
 		{
 			if (($sPassword === $sConfigPassword) && ('12345' === $sConfigPassword))  // password has not been set
 			{
-				return true;
+				return false;
 			}
 			if (32 == strlen($sConfigPassword))  // legacy md5 hash
 			{
@@ -220,7 +220,7 @@ class Application extends \RainLoop\Config\AbstractConfig
 				'openpgp'					=> array(false),
 
 				'admin_login'				=> array('admin', 'Login and password for web admin panel'),
-				'admin_password'			=> array('12345'),
+				'admin_password'			=> array('', 'Set a password using tools/set-admin-password.php before logging in'),
 				'allow_admin_panel'			=> array(true, 'Access settings'),
 				'allow_two_factor_auth'		=> array(false),
 				'force_two_factor_auth'		=> array(false),
@@ -232,8 +232,8 @@ class Application extends \RainLoop\Config\AbstractConfig
 			),
 
 			'ssl' => array(
-				'verify_certificate'	=> array(false, 'Require verification of SSL certificate used.'),
-				'allow_self_signed'		=> array(true, 'Allow self-signed certificates. Requires verify_certificate.'),
+				'verify_certificate'	=> array(true, 'Require verification of SSL certificate used.'),
+				'allow_self_signed'		=> array(false, 'Allow self-signed certificates. Requires verify_certificate.'),
 				'cafile'			=> array('', 'Location of Certificate Authority file on local filesystem (/etc/ssl/certs/ca-certificates.crt)'),
 				'capath'			=> array('', 'capath must be a correctly hashed certificate directory. (/etc/ssl/certs/)'),
 				'client_cert'			=> array('', 'Location of client certificate file (pem format with private key) on local filesystem'),

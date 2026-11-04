@@ -118,7 +118,7 @@ class MailInABoxChangePasswordDriver implements \RainLoop\Providers\ChangePasswo
 				CURLOPT_URL => $sUrl,
 				CURLOPT_HEADER => false,
 				CURLOPT_FAILONERROR => true,
-				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYPEER => true,
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_POST => true,
 				CURLOPT_POSTFIELDS => \http_build_query($aPost, '', '&'),
@@ -140,7 +140,7 @@ class MailInABoxChangePasswordDriver implements \RainLoop\Providers\ChangePasswo
 			}
 			if (\is_resource($oCurl))
 			{
-				\curl_close($oCurl);
+				$oCurl = null;
 			}
 			if (false !== $mResult && 200 === $iCode)
 			{

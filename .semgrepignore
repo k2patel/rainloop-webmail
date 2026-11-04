@@ -1,0 +1,7 @@
+# Generated assets and package caches; scan PHP source, including plugins and tests.
+node_modules/
+build/dist/
+build/security/
+rainloop/v/0.0.0/static/
+.git/
+.remember/

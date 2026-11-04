@@ -374,6 +374,21 @@ class Http
 		return $sIp;
 	}
 
+	private static function RestrictProtocols(array &$aOptions, $sUrl)
+	{
+		$bHttps = 0 === \stripos($sUrl, 'https:');
+		if (\defined('CURLOPT_PROTOCOLS_STR'))
+		{
+			$aOptions[CURLOPT_PROTOCOLS_STR] = $bHttps ? 'https' : 'http,https';
+			$aOptions[CURLOPT_REDIR_PROTOCOLS_STR] = $bHttps ? 'https' : 'http,https';
+		}
+		else
+		{
+			$aOptions[CURLOPT_PROTOCOLS] = $bHttps ? CURLPROTO_HTTPS : CURLPROTO_HTTP | CURLPROTO_HTTPS;
+			$aOptions[CURLOPT_REDIR_PROTOCOLS] = $bHttps ? CURLPROTO_HTTPS : CURLPROTO_HTTP | CURLPROTO_HTTPS;
+		}
+	}
+
 	/**
 	 * @param string $sUrl
 	 * @param array $aPost = array()
@@ -393,7 +408,8 @@ class Http
 			CURLOPT_URL => $sUrl,
 			CURLOPT_HEADER => false,
 			CURLOPT_FAILONERROR => true,
-			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_SSL_VERIFYPEER => true,
+			CURLOPT_SSL_VERIFYHOST => 2,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_POST => true,
 			CURLOPT_POSTFIELDS => \http_build_query($aPost, '', '&'),
@@ -414,6 +430,7 @@ class Http
 			}
 		}
 
+		self::RestrictProtocols($aOptions, $sUrl);
 		$oCurl = \curl_init();
 		\curl_setopt_array($oCurl, $aOptions);
 
@@ -436,10 +453,7 @@ class Http
 			}
 		}
 
-		if (\is_resource($oCurl))
-		{
-			\curl_close($oCurl);
-		}
+		$oCurl = null;
 
 		return $mResult;
 	}
@@ -478,7 +492,8 @@ class Http
 					CURLOPT_HEADER => true,
 					CURLOPT_NOBODY => true,
 					CURLOPT_FAILONERROR => false,
-					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_SSL_VERIFYPEER => true,
+					CURLOPT_SSL_VERIFYHOST => 2,
 					CURLOPT_FOLLOWLOCATION => false,
 					CURLOPT_FORBID_REUSE => false,
 					CURLOPT_RETURNTRANSFER => true,
@@ -490,6 +505,7 @@ class Http
 					$aAddOptions[CURLOPT_HTTPHEADER] = $aOptions[CURLOPT_HTTPHEADER];
 				}
 
+				self::RestrictProtocols($aAddOptions, $sUrl);
 				\curl_setopt_array($oCurl, $aAddOptions);
 
 				do
@@ -523,7 +539,7 @@ class Http
 
 				} while ($iCode && --$iRedirectLimit);
 
-				\curl_close($oCurl);
+				$oCurl = null;
 				if ($iRedirectLimit > 0 && 0 < \strlen($sNewUrl))
 				{
 					$aOptions[CURLOPT_URL] = $sNewUrl;
@@ -577,7 +593,8 @@ class Http
 			CURLOPT_URL => $sUrl,
 			CURLOPT_HEADER => false,
 			CURLOPT_FAILONERROR => true,
-			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_SSL_VERIFYPEER => true,
+			CURLOPT_SSL_VERIFYHOST => 2,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_FOLLOWLOCATION => !!$bFollowLocation,
 			CURLOPT_MAXREDIRS => 7,
@@ -615,6 +632,7 @@ class Http
 
 		\MailSo\Base\Http::DetectAndHackFollowLocationUrl($sUrl, $aOptions, $oLogger);
 
+		self::RestrictProtocols($aOptions, $sUrl);
 		$oCurl = \curl_init();
 		\curl_setopt_array($oCurl, $aOptions);
 
@@ -632,10 +650,7 @@ class Http
 			}
 		}
 
-		if (\is_resource($oCurl))
-		{
-			\curl_close($oCurl);
-		}
+		$oCurl = null;
 
 		return $bResult;
 	}

@@ -58,7 +58,7 @@ class RedisCluster implements ClusterInterface, \IteratorAggregate, \Countable
      */
     public function __construct(
         FactoryInterface $connections,
-        StrategyInterface $strategy = null
+        ?StrategyInterface $strategy = null
     ) {
         $this->connections = $connections;
         $this->strategy = $strategy ?: new RedisClusterStrategy();
@@ -179,7 +179,7 @@ class RedisCluster implements ClusterInterface, \IteratorAggregate, \Countable
      *
      * @return array
      */
-    public function askSlotsMap(NodeConnectionInterface $connection = null)
+    public function askSlotsMap(?NodeConnectionInterface $connection = null)
     {
         if (!$connection && !$connection = $this->getRandomConnection()) {
             return array();
@@ -480,6 +480,7 @@ class RedisCluster implements ClusterInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->pool);
@@ -488,6 +489,7 @@ class RedisCluster implements ClusterInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator(array_values($this->pool));

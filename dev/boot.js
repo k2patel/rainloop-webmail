@@ -1,11 +1,5 @@
-import elementDatasetPolyfill from 'element-dataset';
-elementDatasetPolyfill();
-
-require('json3');
-require('intersection-observer');
-
 import window from 'window';
-import { progressJs } from '../vendors/Progress.js/src/progress.js';
+import { progressJs } from 'Common/Progress';
 
 window.progressJs = window.progressJs || progressJs();
 
@@ -21,7 +15,7 @@ window.progressJs.onbeforeend(() => {
 	}
 });
 
-require('../vendors/modernizr/modernizr-custom.js');
+require('Common/Features');
 require('Common/Booter');
 
 if (window.__runBoot) {

@@ -257,8 +257,9 @@ class Account extends \RainLoop\Account // for backward compatibility
 	 */
 	public function Hash()
 	{
-		return md5(APP_SALT.$this->Email().APP_SALT.$this->DomainIncHost().
-			APP_SALT.$this->DomainIncPort().APP_SALT.$this->Password().APP_SALT.'0'.APP_SALT.$this->ParentEmail().APP_SALT);
+		// Opaque browser/cache identity, not an authentication password verifier.
+		return hash_hmac('sha256', serialize(array($this->Email(), $this->DomainIncHost(),
+			$this->DomainIncPort(), $this->Password(), $this->ParentEmail())), APP_SALT);
 	}
 
 	/**
@@ -453,9 +454,9 @@ class Account extends \RainLoop\Account // for backward compatibility
 			'Password' => $this->Password(),
 			'ProxyAuthUser' => $this->ProxyAuthUser(),
 			'ProxyAuthPassword' => $this->ProxyAuthPassword(),
-			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', false),
+			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', true),
 			'ClientCert' => $this->ClientCert(),
-			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', true),
+			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', false),
 			'UseAuthPlainIfSupported' => !!$oConfig->Get('labs', 'imap_use_auth_plain', true),
 			'UseAuthCramMd5IfSupported' => !!$oConfig->Get('labs', 'imap_use_auth_cram_md5', true)
 		);
@@ -542,8 +543,8 @@ class Account extends \RainLoop\Account // for backward compatibility
 			'Password' => $this->Password(),
 			'ProxyAuthUser' => $this->ProxyAuthUser(),
 			'ProxyAuthPassword' => $this->ProxyAuthPassword(),
-			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', false),
-			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', true),
+			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', true),
+			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', false),
 			'UseAuthPlainIfSupported' => !!$oConfig->Get('labs', 'smtp_use_auth_plain', true),
 			'UseAuthCramMd5IfSupported' => !!$oConfig->Get('labs', 'smtp_use_auth_cram_md5', true)
 		);
@@ -613,8 +614,8 @@ class Account extends \RainLoop\Account // for backward compatibility
 			'Secure' => $this->DomainSieveSecure(),
 			'Login' => $this->IncLogin(),
 			'Password' => $this->Password(),
-			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', false),
-			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', true),
+			'VerifySsl' => !!$oConfig->Get('ssl', 'verify_certificate', true),
+			'AllowSelfSigned' => !!$oConfig->Get('ssl', 'allow_self_signed', false),
 			'InitialAuthPlain' => !!$oConfig->Get('ssl', 'sieve_auth_plain_initial', true)
 		);
 

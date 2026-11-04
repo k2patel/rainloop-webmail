@@ -1,0 +1,64 @@
+RainLoop Webmail 2.x - independently maintained fork
+Forked from https://github.com/RainLoop/rainloop-webmail
+Maintained at https://github.com/k2patel/rainloop-webmail
+
+The application core remains under the MIT license in LICENSE. The original
+RainLoopTeam copyright and permission notice must accompany distributions.
+That license does not relicense third-party libraries, plugins, fonts or images.
+
+Runtime packages are inventoried by tasks/licenses.js when a release is built.
+The release's licenses/ directory contains package metadata and the license,
+copying and notice files available in the installed packages and vendored tree.
+Preserve those files and the notices embedded in source files.
+
+Key licensing findings for this maintained line:
+
+* OpenPGP.js 6.3.2: LGPL-3.0-or-later. It remains a separately replaceable browser
+  script. Retain its license and applicable notices; provide its Corresponding
+  Source and any modifications/build information required by its license when
+  distributing it. Do not publish a minified-only distribution without addressing
+  those obligations. Upstream source: https://github.com/openpgpjs/openpgpjs
+
+* CKEditor 4.6.2, its add-ons and the ambiguous QuickTable add-on have been
+  removed from the maintained source and release. The editor is now Jodit 4.19.4
+  under MIT. Upstream: https://github.com/xdan/jodit
+
+* qr-js 1.1.4 (GPL-3.0) has been replaced by qrcode-generator 2.0.4 (MIT).
+  The old QR library is not shipped in new artifacts. The package's omitted
+  full license text is supplied in licenses/qrcode-generator-MIT.txt.
+
+* LightGallery 1.2.21 has been replaced by GLightbox 3.3.1 (MIT), avoiding a
+  silent change to newer LightGallery licensing terms.
+  Upstream: https://github.com/biati-digital/glightbox
+
+* Bootstrap 2 JavaScript, Modernizr, Progress.js, nanoScroller, LetterFx and
+  the old wake-up plugin have been removed/replaced. Existing Bootstrap LESS
+  layout styles retain their Apache-2.0 attribution in vendors/bootstrap/LICENSE.
+  Current npm versions of jQuery, jQuery UI, routing, key handling and other
+  browser packages are listed in the generated runtime inventory. RainLoop's
+  Keymaster adapter and Insert-key alias patch are identified in source/build code.
+  Inputosaurus and Jua remain application-specific maintained code; their original
+  embedded attribution is retained alongside this fork's compatibility fixes.
+
+* DOMPurify 3.4.17 offers Apache-2.0 or MPL-2.0. This distribution elects the
+  Apache-2.0 option without restricting recipients' original choices. Preserve
+  its distributed licenses and notices.
+
+* tmhOAuth carries Apache-2.0 terms. Preserve that license and applicable notices.
+
+* MailSo, PHPThumb, spyc and many other dependencies carry MIT or BSD notices.
+  lessphp offers an MIT option. PclZip and PHP-OAuth2 carry LGPL notices.
+  Their individual terms and attribution still apply.
+
+* The old Facebook SDK includes a Facebook Platform-specific grant and policy
+  conditions in its file headers. It is not covered by the core's MIT license.
+
+Release limitations still requiring review:
+
+This inventory is not a blanket statement that every asset has been cleared.
+Some legacy PHP libraries refer to license files absent from the vendored tree;
+some fonts/icons have incomplete provenance. OpenPGP and modified LGPL libraries require a complete Corresponding
+Source/notice plan. Review the
+generated inventory and those gaps before public release. Keeping the original
+RainLoop name with an independent-fork label documents provenance; the code
+license is not a determination of trademark rights or endorsement.

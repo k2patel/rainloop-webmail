@@ -1,17 +1,18 @@
-version: '2'
+# Development environment. Mail/database fixtures require the integration profile.
 services:
   mail:
-    image: tvial/docker-mailserver:latest
+    image: ghcr.io/docker-mailserver/docker-mailserver:16.0.1
+    profiles: [integration]
     hostname: mail
     container_name: rl.mail
     domainname: domain.com
     restart: always
     ports:
-      - 25:25
-      - 143:143
+      - 127.0.0.1:2525:25
+      - 127.0.0.1:1143:143
     volumes:
-      - maildata:/var/mail
-      - mailstate:/var/mail-state
+      - maildata-v2:/var/mail
+      - mailstate-v2:/var/mail-state
       - ./.docker/mail/config/:/tmp/docker-mailserver/
     environment:
       - ENABLE_SPAMASSASSIN=0
@@ -20,45 +21,47 @@ services:
       - ENABLE_POSTGREY=0
       - ENABLE_MANAGESIEVE=1
       - ONE_DIR=1
-      - DMS_DEBUG=0
-    cap_add:
-      - NET_ADMIN
-      - SYS_PTRACE
+      - LOG_LEVEL=info
   db:
-    image: mysql:5.7
+    image: mysql:8.4
+    profiles: [integration]
     hostname: db
     container_name: rl.db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_USER: rainloop
-      MYSQL_PASSWORD: rainloop
+      MYSQL_PASSWORD: ${RAINLOOP_DB_PASSWORD:-}
       MYSQL_DATABASE: rainloop
     volumes:
-      - mysql:/var/lib/mysql
+      - mysql-v2:/var/lib/mysql
       - tmp:/tmp
   php:
     build:
       context: ./.docker/php
     hostname: php
     container_name: rl.php
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     expose:
       - 9000
-    depends_on:
-      - db
-      - mail
     volumes:
-      - ./:/var/www
+      - ./:/var/www:ro
       # - ./build/local/:/var/www
-      - ./.docker/php/rainloop.ini:/usr/local/etc/php/conf.d/rainloop.ini
-      - tmp:/tmp
+      - rainloop-data:/var/www/data
   node:
     build:
       context: ./.docker/node
+    profiles: [tools]
     hostname: node
     container_name: rl.node
     working_dir: /var/www
-    command: sh -c 'yarn --version'
+    command: ["yarn", "--version"]
     volumes:
       - ./:/var/www
       - tmp:/tmp
@@ -80,16 +83,26 @@ services:
   tx:
     build:
       context: ./.docker/tx
+    profiles: [tools]
     hostname: tx
     container_name: rl.tx
     working_dir: /var/www
-    command: sh -c 'tx --version'
+    command: ["--version"]
     volumes:
       - ./:/var/www
-      - ./.docker/.cache/tx/root:/root
+      - ./.docker/.cache/tx/home:/home/nonroot
       - tmp:/tmp
 
 volumes:
+  rainloop-data:
+    driver: local
+  mysql-v2:
+    driver: local
+  maildata-v2:
+    driver: local
+  mailstate-v2:
+    driver: local
+  # Archived integration volumes are retained; migration is a separate operation.
   mysql:
     driver: local
   maildata:

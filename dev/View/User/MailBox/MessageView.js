@@ -523,50 +523,20 @@ class MessageViewMailBoxUserView extends AbstractViewNext {
 			let index = 0,
 				listIndex = 0;
 
-			const div = $('<div>'),
-				dynamicEls = _.compact(
-					_.map(this.message().attachments(), (item) => {
-						if (item && !item.isLinked && item.isImage()) {
-							if (item === attachment) {
-								index = listIndex;
-							}
-
-							listIndex += 1;
-
-							return {
-								src: item.linkPreview(),
-								thumb: item.linkThumbnail(),
-								subHtml: item.fileName,
-								downloadUrl: item.linkPreview()
-							};
-						}
-
-						return null;
-					})
-				);
-
-			if (0 < dynamicEls.length) {
-				div.on('onBeforeOpen.lg', () => {
-					useKeyboardShortcuts(false);
-					removeInFocus(true);
-				});
-
-				div.on('onCloseAfter.lg', () => {
-					useKeyboardShortcuts(true);
-				});
-
-				div.lightGallery({
-					dynamic: true,
-					loadYoutubeThumbnail: false,
-					loadVimeoThumbnail: false,
-					thumbWidth: 80,
-					thumbContHeight: 95,
-					showThumbByDefault: false,
-					mode: 'lg-lollipop', // 'lg-slide',
-					index: index,
-					dynamicEl: dynamicEls
-				});
-			}
+			const elements = _.compact(_.map(this.message().attachments(), (item) => {
+                if (item && !item.isLinked && item.isImage()) {
+                    if (item === attachment) index = listIndex;
+                    listIndex += 1;
+                    return { href: item.linkPreview(), type: 'image', alt: item.fileName };
+                }
+                return null;
+            }));
+            if (elements.length) {
+                const gallery = window.GLightbox({ elements, startAt: index, autoplayVideos: false });
+                gallery.on('open', () => { useKeyboardShortcuts(false); removeInFocus(true); });
+                gallery.on('close', () => { useKeyboardShortcuts(true); gallery.destroy(); });
+                gallery.open();
+            }
 
 			return false;
 		}

@@ -73,11 +73,11 @@ class Pop3Client extends \MailSo\Net\NetClient
 	 */
 	public function Connect($sServerName, $iPort = 110,
 		$iSecurityType = \MailSo\Net\Enumerations\ConnectionSecurityType::AUTO_DETECT,
-		$bVerifySsl = false, $bAllowSelfSigned = null)
+		$bVerifySsl = false, $bAllowSelfSigned = null, $sClientCert = '')
 	{
 		$this->iRequestTime = microtime(true);
 
-		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned);
+		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned, $sClientCert);
 		
 		$this->validateResponse();
 

@@ -99,10 +99,10 @@ abstract class Document extends Component {
         $args = func_get_args();
         if (count($args)===0 || is_array($args[0])) {
             array_unshift($args, $this, static::$defaultName);
-            call_user_func_array(array('parent', '__construct'), $args);
+            parent::__construct(...$args);
         } else {
             array_unshift($args, $this);
-            call_user_func_array(array('parent', '__construct'), $args);
+            parent::__construct(...$args);
         }
 
     }
@@ -161,7 +161,7 @@ abstract class Document extends Component {
      * @param bool $defaults
      * @return Component
      */
-    public function createComponent($name, array $children = null, $defaults = true) {
+    public function createComponent($name, ?array $children = null, $defaults = true) {
 
         $name = strtoupper($name);
         $class = 'SabreForRainLoop\\VObject\\Component';
@@ -190,7 +190,7 @@ abstract class Document extends Component {
      * @param string $valueType Force a specific valuetype, such as URI or TEXT
      * @return Property
      */
-    public function createProperty($name, $value = null, array $parameters = null, $valueType = null) {
+    public function createProperty($name, $value = null, ?array $parameters = null, $valueType = null) {
 
         // If there's a . in the name, it means it's prefixed by a groupname.
         if (($i=strpos($name,'.'))!==false) {

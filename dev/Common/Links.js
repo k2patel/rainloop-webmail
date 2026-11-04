@@ -322,20 +322,6 @@ export function openPgpJs() {
 }
 
 /**
- * @returns {string}
- */
-export function openPgpWorkerJs() {
-	return staticPrefix('js/min/openpgp.worker.min.js');
-}
-
-/**
- * @returns {string}
- */
-export function openPgpWorkerPath() {
-	return staticPrefix('js/min/');
-}
-
-/**
  * @param {string} theme
  * @returns {string}
  */

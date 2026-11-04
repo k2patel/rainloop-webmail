@@ -117,7 +117,7 @@ class ManageSieveClient extends \MailSo\Net\NetClient
 	{
 		$this->iRequestTime = \microtime(true);
 
-		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned);
+		parent::Connect($sServerName, $iPort, $iSecurityType, $bVerifySsl, $bAllowSelfSigned, $sClientCert);
 
 		$mResponse = $this->parseResponse();
 		$this->validateResponse($mResponse);

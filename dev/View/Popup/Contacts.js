@@ -428,6 +428,7 @@ class ContactsPopupView extends AbstractViewNext {
 			const j = new Jua({
 				'action': uploadContacts(),
 				'name': 'uploader',
+				'hidden': { XToken: () => Settings.appSettingsGet('token') },
 				'queueSize': 1,
 				'multipleSizeLimit': 1,
 				'disableDragAndDrop': true,

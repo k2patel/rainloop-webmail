@@ -36,7 +36,7 @@ include __DIR__ . '/Parser/Json.php';
 include __DIR__ . '/Parser/MimeDir.php';
 include __DIR__ . '/Property/Binary.php';
 include __DIR__ . '/Property/Boolean.php';
-include __DIR__ . '/Property/Float.php';
+include __DIR__ . '/Property/FloatValue.php';
 include __DIR__ . '/Property/ICalendar/DateTime.php';
 include __DIR__ . '/Property/ICalendar/Duration.php';
 include __DIR__ . '/Property/ICalendar/Period.php';

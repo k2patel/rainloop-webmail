@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Frontend upgrade regression checks</title>
+<link rel="stylesheet" href="../rainloop/v/0.0.0/static/css/app.css">
+<script type="importmap">
+{"imports":{"window":"data:text/javascript,export default window;","_":"data:text/javascript,export default window._;","$":"data:text/javascript,export default window.jQuery;","dompurify":"../node_modules/dompurify/dist/purify.es.mjs","Storage/Settings":"./frontend-settings.mjs"}}
+</script>
+<h1>Frontend upgrade regression checks</h1>
+<p id="status" role="status">Running</p>
+<ol id="checks"></ol>
+<div id="editor" style="height:400px;width:700px"></div>
+<div class="dropdown" id="dropdown"><button data-toggle="dropdown">Menu</button><ul class="dropdown-menu"><li>Item</li></ul></div>
+<div id="modal" class="modal" style="display:none"><button>Modal control</button></div>
+<ul id="sort"><li>First</li><li>Second</li></ul>
+<input id="addresses"><div class="nano" style="height:60px"><div class="nano-content">Scroll content</div></div>
+<script src="../rainloop/v/0.0.0/static/js/libs.js"></script>
+<script src="../rainloop/v/0.0.0/static/editor/jodit.min.js"></script>
+<script src="../node_modules/js-cookie/dist/js.cookie.js"></script>
+<script src="../node_modules/qrcode-generator/dist/qrcode.js"></script>
+<script type="module">
+import HtmlEditor from '../dev/Common/HtmlEditor.js';
+let count=0;
+const check=(name,condition)=>{if(!condition)throw new Error(name);count++;const row=document.createElement('li');row.textContent=name;document.getElementById('checks').append(row);};
+try {
+ check('jQuery 4 loads', jQuery.fn.jquery==='4.0.0');
+ check('jQuery UI 1.14 loads',jQuery.ui.version==='1.14.2');
+ check('Knockout current release loads',ko.version==='3.5.3');
+ let shortcutCount=0; key('insert',['scope-one','scope-two'],()=>shortcutCount++);key.setScope('scope-two');document.dispatchEvent(new KeyboardEvent('keydown',{keyCode:45,bubbles:true}));check('Multiple-scope Insert shortcut',shortcutCount===1);key.setScope('all');
+ jQuery('#sort').sortable(); check('Sortable initializes',!!jQuery('#sort').sortable('instance'));jQuery('#sort').sortable('destroy');
+ jQuery('#addresses').inputosaurus({}); check('Recipient input initializes',!!jQuery('#addresses').inputosaurus('instance'));
+
+ jQuery('#dropdown button').trigger('click'); check('Dropdown opens',jQuery('#dropdown').hasClass('open'));jQuery('#dropdown button').trigger('click');check('Dropdown closes',!jQuery('#dropdown').hasClass('open'));
+ let shown=false;jQuery('#modal').on('shown',()=>shown=true).modal('show');check('Modal opens and emits event',shown&&jQuery('#modal').hasClass('in'));jQuery('#modal').modal('hide');check('Modal closes',jQuery('#modal').css('display')==='none');
+ Cookies.set('rainloop-test',JSON.stringify({value:'roundtrip'}));check('Cookie JSON survives v3 API',JSON.parse(Cookies.get('rainloop-test')).value==='roundtrip');Cookies.remove('rainloop-test');
+ check('Activity tracking has current API',typeof ifvisible.idle==='function'&&typeof ifvisible.now==='function');
+ const qr=qrcode(0,'M');qr.addData('otpauth://totp/test?secret=TEST');qr.make();check('2FA QR renders',qr.createDataURL(6,24).startsWith('data:image/gif;base64,'));
+ let ready=false, mode;
+ const editor=new HtmlEditor(document.getElementById('editor'),null,()=>ready=true,value=>mode=value);
+ await Promise.resolve();
+ check('Editor ready callback',ready);
+ editor.setHtml('<p>Hello <b>world</b></p>');check('Rich text roundtrip',/<(b|strong)>world<\/(b|strong)>/.test(editor.getData()));
+ editor.resetDirty();check('Dirty state resets',!editor.checkDirty());editor.editor.value+='<p>Changed</p>';check('Dirty state detects edits',editor.checkDirty());
+ editor.setPlain('<b>literal</b>\nnext');check('Plain text remains literal',editor.getData()==='<b>literal</b>\nnext'&&!editor.isHtml());
+ editor.modeToggle(true);check('Plain to HTML escapes markup',editor.getData().includes('&lt;b&gt;literal&lt;/b&gt;')&&mode===true);
+ editor.setHtml('<p>Hello</p>');editor.setSignature('First',false);editor.setSignature('Second',false);check('Signature replacement',editor.getData().includes('Second')&&!editor.getData().includes('First'));
+ editor.setHtml('<img src=x onerror="window.exploited=1"><script>window.exploited=1<\/script><a href="javascript:alert(1)">bad</a>');check('Editor strips active HTML',!editor.getData().includes('onerror')&&!editor.getData().includes('javascript:')&&!editor.getData().includes('<script'));
+ editor.setReadOnly(true);check('Read-only mode',editor.editor.getReadOnly()&&editor.plain.readOnly);editor.setReadOnly(false);
+ editor.setPlain('Ready');editor.focus();check('Editor focus',editor.hasFocus());editor.blur();check('Editor blur',!editor.hasFocus());
+ const gallery=GLightbox({elements:[{href:'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',type:'image',alt:'<img src=x onerror=alert(1)>'}]});gallery.open();check('Image preview opens',!!document.querySelector('.glightbox-container'));gallery.close();gallery.destroy();
+ document.getElementById('status').textContent=count+' checks passed';
+} catch(error) {document.getElementById('status').textContent='FAILED: '+error.message;console.error(error);}
+</script>
+</html>

@@ -121,7 +121,8 @@
 			}
 
 			o.wrapperElement && o.wrapperElement.append(els.ul);
-			this.element.replaceWith(o.wrapperElement || els.ul);
+			this.element.before(o.wrapperElement || els.ul);
+            this.element.detach();
 			els.origInputCont.append(this.element).hide();
 
 			els.inputCont.append(els.input);
@@ -135,7 +136,7 @@
 			widget._attachEvents();
 
 			// if instantiated input already contains a value, parse that junk
-			if($.trim(this.element.val())){
+			if(String(this.element.val() || '').trim()){
 				els.input.val( this.element.val() );
 				this.parseInput();
 			}
@@ -225,7 +226,7 @@
 			val = widget.elements.input.val();
 
 			if (val) {
-				if ($.isFunction(widget.options.splitHook)) {
+				if ((typeof widget.options.splitHook === 'function')) {
 					hook = widget.options.splitHook(val);
 				} else {
 					delimiterFound = widget._containsDelimiter(val);
@@ -236,16 +237,16 @@
 				values = hook;
 			} else if(delimiterFound !== false){
 				values = val.split(delimiterFound);
-			} else if(!ev || ev.which === $.ui.keyCode.ENTER && !$('.ui-menu-item .ui-state-focus').size() && !$('#ui-active-menuitem').size()){
+			} else if(!ev || ev.which === $.ui.keyCode.ENTER && !$('.ui-menu-item .ui-state-focus').length && !$('#ui-active-menuitem').length){
 				values.push(val);
 				ev && ev.preventDefault();
 
 			// prevent autoComplete menu click from causing a false 'blur'
-			} else if(ev.type === 'blur' && !$('#ui-active-menuitem').size()){
+			} else if(ev.type === 'blur' && !$('#ui-active-menuitem').length){
 				values.push(val);
 			}
 
-			$.isFunction(widget.options.parseHook) && (values = widget.options.parseHook(values));
+			(typeof widget.options.parseHook === 'function') && (values = widget.options.parseHook(values));
 
 			if(values.length){
 				widget._setChosen(values);
@@ -450,7 +451,7 @@
 		_setChosen : function(valArr) {
 			var self = this;
 
-			if(!$.isArray(valArr)){
+			if(!Array.isArray(valArr)){
 				return false;
 			}
 
@@ -529,9 +530,10 @@
 			if (name !== undefined && obj) {
 				var
 					widget = this,
-					$li = $('<li data-inputosaurus="' + key + '" title="' + obj.toLine(false, false, true) +
-						'"><a href="javascript:void(0);" class="ficon">&#x2716;</a><span>' +
-						obj.toLine(true, false, true) + '</span></li>')
+					$li = $('<li>').attr('data-inputosaurus', key)
+                        .attr('title', obj.toLine(false, false, false))
+                        .append($('<a href="#" class="ficon">').text('\u2716'))
+                        .append($('<span>').text(obj.toLine(false, false, false)))
 				;
 
 				$li.data('inputosaurus-value', obj.toLine(false, false, false));
@@ -547,7 +549,7 @@
 					});
 				}
 
-				$.isFunction(this.options.elementHook) && (this.options.elementHook($li, obj));
+				(typeof this.options.elementHook === 'function') && (this.options.elementHook($li, obj));
 
 				return $li;
 			}
@@ -645,7 +647,7 @@
 			values.push(val);
 
 			if (val) {
-				if ($.isFunction(this.options.splitHook)) {
+				if ((typeof this.options.splitHook === 'function')) {
 					var hook = this.options.splitHook(val);
 					if (hook) {
 						values = hook;
@@ -658,7 +660,7 @@
 			if (values.length) {
 				this._chosenValues = [];
 
-				$.isFunction(this.options.parseHook) && (values = this.options.parseHook(values));
+				(typeof this.options.parseHook === 'function') && (values = this.options.parseHook(values));
 
 				this._setChosen(values);
 				this._renderTags();
@@ -688,7 +690,9 @@
 		},
 
 		_destroy: function() {
-			this.elements.input.unbind('.inputosaurus');
+			if (!this.elements) return;
+            this.elements.input.off('.inputosaurus');
+            this.element.detach();
 			this.elements.ul.replaceWith(this.element);
 		}
 	};

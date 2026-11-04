@@ -271,7 +271,7 @@ function runApp() {
 			})
 			.then(() => jassl(appData.StaticEditorJsLink))
 			.then(() => {
-				if (window.CKEDITOR && window.__initEditor) {
+				if (window.Jodit && window.__initEditor) {
 					window.__initEditor();
 					window.__initEditor = null;
 				}

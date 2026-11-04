@@ -121,8 +121,7 @@ class MailcowChangePasswordDriver implements \RainLoop\Providers\ChangePassword\
 							if ($oStmt->execute(array($this->cryptPassword($sNewPassword), $aFetchResult[0]['username']))) {
 								$oStmt = $oPdo ->prepare('UPDATE users SET digesta1=MD5(CONCAT(?, ":SabreDAV:", ?)) WHERE username=?');
 								if ($oStmt->execute(array($aFetchResult[0]['username'],$sNewPassword,$aFetchResult[0]['username']))) {
-									//the MailCow & SabreDav have been updated, now update the doveadm password
-									exec("/usr/bin/doveadm pw -s SHA512-CRYPT -p $sNewPassword", $hash, $return);
+									// doveadm pw only generates a hash; the mailbox password is already saved above.
 									$bResult = true;
 								}
 							}

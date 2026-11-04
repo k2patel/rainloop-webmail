@@ -1,10 +1,8 @@
 import ko from 'ko';
 
-import { isNonEmptyArray, log } from 'Common/Utils';
+import { isNonEmptyArray } from 'Common/Utils';
 
 import { AbstractModel } from 'Knoin/AbstractModel';
-
-import PgpStore from 'Stores/User/Pgp';
 
 class OpenPgpKeyModel extends AbstractModel {
 	/**
@@ -18,7 +16,7 @@ class OpenPgpKeyModel extends AbstractModel {
 	 * @param {string} armor
 	 * @param {string} userID
 	 */
-	constructor(index, guID, ID, IDs, userIDs, emails, isPrivate, armor, userID) {
+	constructor(index, guID, ID, IDs, userIDs, emails, isPrivate, armor, userID, nativeKey) {
 		super('OpenPgpKeyModel');
 
 		this.index = index;
@@ -30,6 +28,7 @@ class OpenPgpKeyModel extends AbstractModel {
 		this.email = '';
 		this.emails = emails;
 		this.armor = armor;
+		this.nativeKey = nativeKey;
 		this.isPrivate = !!isPrivate;
 
 		this.selectUser(userID);
@@ -38,22 +37,11 @@ class OpenPgpKeyModel extends AbstractModel {
 	}
 
 	getNativeKey() {
-		let key = null;
-		try {
-			key = PgpStore.openpgp.key.readArmored(this.armor);
-			if (key && !key.err && key.keys && key.keys[0]) {
-				return key;
-			}
-		} catch (e) {
-			log(e);
-		}
-
-		return null;
+		return this.nativeKey;
 	}
 
 	getNativeKeys() {
-		const key = this.getNativeKey();
-		return key && key.keys ? key.keys : null;
+		return this.nativeKey ? [this.nativeKey] : [];
 	}
 
 	select(pattern, property) {

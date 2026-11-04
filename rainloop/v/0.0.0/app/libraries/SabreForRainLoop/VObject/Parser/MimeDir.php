@@ -384,7 +384,7 @@ class MimeDir extends Parser {
             $propObj->add(null, $namelessParameter);
         }
 
-        if (strtoupper($propObj['ENCODING']) === 'QUOTED-PRINTABLE') {
+        if (strtoupper((string)$propObj['ENCODING']) === 'QUOTED-PRINTABLE') {
             $propObj->setQuotedPrintableValue($this->extractQuotedPrintableValue());
         } else {
             $propObj->setRawMimeDirValue($property['value']);

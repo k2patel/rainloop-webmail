@@ -754,11 +754,11 @@ class xmlapi
     private function curl_query( $url, $postdata, $authstr )
     {
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         // Return contents of transfer on curl_exec
          curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         // Allow self-signed certs
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
         // Set the URL
         curl_setopt($curl, CURLOPT_URL, $url);
         // Increase buffer size to avoid "funny output" exception
@@ -777,7 +777,7 @@ class xmlapi
         if ($result == false) {
             throw new Exception("curl_exec threw error \"" . curl_error($curl) . "\" for " . $url . "?" . $postdata );
         }
-        curl_close($curl);
+        $curl = null;
 
         return $result;
     }

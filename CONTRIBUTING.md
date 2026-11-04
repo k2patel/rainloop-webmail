@@ -1,31 +1,21 @@
-**Thanks for contributing to RainLoop Webmail!**
+# Contributing to the maintained RainLoop Webmail fork
 
-1. Fork the repo, do work in a feature branch.
-2. Issue a pull request.
+This repository independently continues archived RainLoop. Submit changes to
+[k2patel/rainloop-webmail](https://github.com/k2patel/rainloop-webmail); merge-back
+into archived upstream is not planned. Preserve original attribution and the
+fork notice.
 
----
+Use Node 24.11+, Yarn Classic 1.22.22 and PHP 8.2–8.5. Do not install Gulp.
+Follow [development and security checks](docs/DEVELOPMENT.md), including the
+frontend/browser tests, PHP checks and security scan. Build release artifacts
+with `yarn build`. The deployed PHP runtime is distroless; use the Node build
+container or a local build environment for development tools.
 
-**Getting started**
+When editing templates, disable `cache_system_data` in your disposable development
+configuration. `use_app_debug_js` and `use_app_debug_css` select readable browser
+assets. Do not commit real installation data, credentials, private keys or local
+configuration.
 
-1. Install node.js - `https://nodejs.org/download/`
-2. Install yarn - `https://yarnpkg.com/en/docs/install`
-3. Install gulp - `npm install gulp -g`
-4. Fork rainloop - `https://github.com/RainLoop/rainloop-webmail/issues/new#fork-destination-box`
-5. Clone rainloop - `git clone git@github.com:USERNAME/rainloop-webmail.git rainloop`
-6. `cd rainloop`
-7. Install install all dependencies - `yarn install`
-8. Run gulp - `gulp`
-
----
-
-**Debugging JavaScript**
-
-1. Edit data/\_data_/\_default_/configs/application.ini
-2. Set 'use_app_debug_js' (and optionally 'use_app_debug_css') to 'On'
-
----
-
-**Editing HTML Template Files**
-
-1. Edit data/\_data_/\_default_/configs/application.ini
-2. Set 'cache_system_data' to Off
+Dependency updates must include API migration checks and license/notice updates.
+Keep compatibility changes and documented breaking changes visible in the
+[1.x → 2.x summary](docs/MIGRATION-1.x-TO-2.x.md) and upgrade guide.

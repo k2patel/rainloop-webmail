@@ -519,7 +519,7 @@ class Client {
 					}
 				} while ($code && --$mr);
 
-				curl_close($rcurl);
+				$rcurl = null;
 				if ($mr > 0)
 				{
 					curl_setopt($curl, CURLOPT_URL, $newurl);

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>OpenPGP browser regression checks</title>
+<h1>OpenPGP browser regression checks</h1>
+<p>Uses generated test keys and in-memory storage.</p>
+<button id="run">Run encryption checks</button>
+<p id="status" role="status">Ready to test</p>
+<ol id="checks"></ol>
+<script src="../node_modules/openpgp/dist/openpgp.min.js"></script>
+<script type="module">
+import * as helpers from '../dev/Common/OpenPgp.js';
+import { runOpenPgpChecks } from './openpgp-cases.mjs';
+const button = document.getElementById('run');
+button.addEventListener('click', async () => {
+    button.disabled = true;
+    const status = document.getElementById('status');
+    status.textContent = 'Running checks';
+    try {
+        const checks = await runOpenPgpChecks(window.openpgp, helpers, (name) => {
+            const item = document.createElement('li');
+            item.textContent = name;
+            document.getElementById('checks').append(item);
+        });
+        status.textContent = `${checks} checks passed`;
+    } catch (error) {
+        status.textContent = 'FAILED: ' + error.message;
+        console.error(error);
+    }
+});
+</script>
+</html>
