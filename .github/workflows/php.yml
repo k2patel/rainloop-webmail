@@ -24,7 +24,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: upgrade-test-package
-          path: build/dist/releases/webmail/2.*/rainloop-webmail-fork-2.*.zip*
+          path: build/dist/releases/webmail/2.*/rainloop-webmail-2.*.zip*
           if-no-files-found: error
   upgrade:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
         with:
           name: upgrade-test-package
           path: build/upgrade-test
-      - run: sh tests/upgrade-in-place.sh build/upgrade-test/*/rainloop-webmail-fork-*.zip
+      - run: sh tests/upgrade-in-place.sh build/upgrade-test/*/rainloop-webmail-*.zip
   php:
     runs-on: ubuntu-latest
     strategy:

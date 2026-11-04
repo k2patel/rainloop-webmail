@@ -104,7 +104,7 @@ async function release() {
   "require dirname(__DIR__, 5) . '/index.php';"));
  collectLicenses(app);
  await collectReleaseSources(app);
- const target = `${root}/rainloop-webmail-fork-${pkg.version}.zip`;
+ const target = `${root}/rainloop-webmail-${pkg.version}.zip`;
  const stream = createWriteStream(target);
  const archive = new ZipArchive({ zlib: { level: 9 } });
  archive.on('error', (error) => stream.destroy(error));

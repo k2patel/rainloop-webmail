@@ -51,7 +51,7 @@ To test the manual in-place upgrade against the immutable archived baseline, bui
 a release and run from a full-history source checkout with PHP and Git available:
 
 ```sh
-sh tests/upgrade-in-place.sh build/dist/releases/webmail/2.0.1/rainloop-webmail-fork-2.0.1.zip
+sh tests/upgrade-in-place.sh build/dist/releases/webmail/2.0.1/rainloop-webmail-2.0.1.zip
 ```
 
 This uses disposable data and the packaged entry point. It must never be pointed

@@ -59,11 +59,11 @@ yarn build
 The output is:
 
 ```text
-build/dist/releases/webmail/2.0.1/rainloop-webmail-fork-2.0.1.zip
+build/dist/releases/webmail/2.0.1/rainloop-webmail-2.0.1.zip
 ```
 
 The adjacent `.zip.sha256` file contains the archive's SHA-256 checksum. Verify
-it before extracting; for example `sha256sum -c rainloop-webmail-fork-2.0.1.zip.sha256`
+it before extracting; for example `sha256sum -c rainloop-webmail-2.0.1.zip.sha256`
 on Linux, or compare `sha256`/`shasum -a 256` output on OpenBSD/macOS. A checksum
 detects a mismatched or damaged download; it is not a maintainer signature.
 

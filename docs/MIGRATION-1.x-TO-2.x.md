@@ -111,7 +111,7 @@ custom themes and plugins against the changed editor, controls and markup.
   is no longer required. Dependencies are pinned and the lockfile is updated.
 - Applied the published minimatch build-tool security fix through a documented
   dependency resolution; lint and archive generation exercise the changed version.
-- The maintained build produces `rainloop-webmail-fork-2.0.0.zip` with the correct
+- The maintained build produces `rainloop-webmail-2.0.1.zip` with the correct
   versioned directory/entry point, hidden protection files, CLI admin tool,
   documentation, third-party license inventory and a companion SHA-256 checksum. It does not build the removed
   legacy ownCloud integration. The old PHP 5 Debian-package script is retired;
