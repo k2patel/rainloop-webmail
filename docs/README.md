@@ -9,6 +9,7 @@ The application name is retained; the separate maintained release line starts at
 - [Summary of today's 1.x → 2.x changes](MIGRATION-1.x-TO-2.x.md).
 - [Upgrade from archived 1.x](UPGRADING.md): backups, deployment, breaking changes and rollback.
 - [Development and security checks](DEVELOPMENT.md): frontend build, PHP lint and security scans.
+- [Dependency and development-tool inventory](DEPENDENCIES.md).
 - [License and third-party notices](../THIRD_PARTY_NOTICES.txt).
 - [OpenBSD httpd example](../build/openbsd/httpd.conf).
 

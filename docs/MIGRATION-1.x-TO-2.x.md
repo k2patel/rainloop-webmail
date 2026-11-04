@@ -65,6 +65,11 @@ Sabre, Predis, Imagine, PHPThumb and other affected code paths were adjusted.
 Exception-log deduplication uses `WeakMap` rather than attaching dynamic properties
 to exceptions.
 
+Spyc was upgraded from 0.5.1 to release 0.6.3 and all translation YAML files are
+covered by regression checks. Unused upstream PHPUnit development declarations
+were removed from vendored runtime manifests; the application does not install
+or ship those upstream test runners. See [dependency inventory](DEPENDENCIES.md).
+
 These compatibility edits do not mean every bundled PHP library has been migrated
 to its newest upstream major version. Application-specific forks and optional
 plugins still require separate migration/integration review.
