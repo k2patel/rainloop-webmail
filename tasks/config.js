@@ -95,7 +95,7 @@ config.paths.js = {
 			'node_modules/knockout/build/output/knockout-latest.js',
 			'node_modules/knockout-sortable/build/knockout-sortable.min.js ',
 			'node_modules/simplestatemanager/dist/ssm.min.js',
-			'node_modules/autolinker/dist/Autolinker.min.js',
+			'node_modules/autolinker/dist/autolinker.min.js',
 			'node_modules/opentip/lib/opentip.js',
 			'node_modules/opentip/lib/adapter-jquery.js',
 			'node_modules/glightbox/dist/js/glightbox.min.js',
