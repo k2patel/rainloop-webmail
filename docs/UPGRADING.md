@@ -62,6 +62,11 @@ The output is:
 build/dist/releases/webmail/2.0.0/rainloop-webmail-fork-2.0.0.zip
 ```
 
+The adjacent `.zip.sha256` file contains the archive's SHA-256 checksum. Verify
+it before extracting; for example `sha256sum -c rainloop-webmail-fork-2.0.0.zip.sha256`
+on Linux, or compare `sha256`/`shasum -a 256` output on OpenBSD/macOS. A checksum
+detects a mismatched or damaged download; it is not a maintainer signature.
+
 Use the version named by the release when a later 2.x version is available.
 The package contains a generated `index.php` and `rainloop/v/2.0.0/` tree,
 license notices, documentation and the local admin-password tool. Development

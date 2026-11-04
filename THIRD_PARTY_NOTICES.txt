@@ -16,8 +16,9 @@ Key licensing findings for this maintained line:
 * OpenPGP.js 6.3.2: LGPL-3.0-or-later. It remains a separately replaceable browser
   script. Retain its license and applicable notices; provide its Corresponding
   Source and any modifications/build information required by its license when
-  distributing it. Do not publish a minified-only distribution without addressing
-  those obligations. Upstream source: https://github.com/openpgpjs/openpgpjs
+  distributing it. The maintained ZIP includes the matching preferred source
+  archive under licenses/sources/ with a pinned digest and replacement/build
+  instructions. Preserve that source and its notices when redistributing it. Upstream source: https://github.com/openpgpjs/openpgpjs
 
 * CKEditor 4.6.2, its add-ons and the ambiguous QuickTable add-on have been
   removed from the maintained source and release. The editor is now Jodit 4.19.4

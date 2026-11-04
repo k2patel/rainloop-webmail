@@ -13,7 +13,10 @@ yarn test:browser
 yarn audit:dependencies
 ```
 
-`yarn build` also packages the maintained 2.x release archive. The build uses
+`yarn build` also packages the maintained 2.x release archive and its SHA-256
+file. Release packaging downloads the pinned OpenPGP source archive, verifies
+its digest, and includes it with build/replacement instructions. A verified
+copy is cached under ignored `build/vendor-sources/` for subsequent builds. The build uses
 Webpack 5, Babel 8, ESLint 10 and current Less/archive tooling; it does not require
 Gulp or the legacy OpenSSL provider. Browser checks use generated test keys and
 in-memory test storage. To use an installed Chrome, set `CHROME_PATH` when running

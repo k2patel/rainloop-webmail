@@ -1,6 +1,7 @@
 /* RainLoop Webmail (c) RainLoop Team | Licensed under MIT */
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import { createRequire } from 'node:module';
 import { finished } from 'node:stream/promises';
@@ -11,6 +12,7 @@ import autoprefixer from 'autoprefixer';
 import { minify } from 'terser';
 import { ZipArchive } from 'archiver';
 import { ESLint } from 'eslint';
+import { collectReleaseSources } from './release-sources.mjs';
 const require = createRequire(import.meta.url);
 const { config } = require('../tasks/config.js');
 const { collectLicenses } = require('../tasks/licenses.js');
@@ -100,6 +102,7 @@ async function release() {
  await copy('.docker/php', `${dist}/.docker/php`);
  await copy('.docker/nginx/default.conf', `${dist}/.docker/nginx/default.conf`);
  collectLicenses(dist);
+ await collectReleaseSources(dist);
  const target = `${root}/rainloop-webmail-fork-${pkg.version}.zip`;
  const stream = createWriteStream(target);
  const archive = new ZipArchive({ zlib: { level: 9 } });
@@ -108,6 +111,8 @@ async function release() {
  archive.directory(dist, false);
  await archive.finalize();
  await finished(stream);
+ const checksum = createHash('sha256').update(await fs.readFile(target)).digest('hex');
+ await write(target + '.sha256', `${checksum}  ${path.basename(target)}\n`);
  await fs.rm(dist, { recursive: true, force: true });
  console.log(`Release artifact: ${target}`);
 }

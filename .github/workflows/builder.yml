@@ -32,5 +32,5 @@ jobs:
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: rainloop-webmail-maintained-v2
-        path: build/dist/releases/webmail/2.*/rainloop-webmail-fork-2.*.zip
+        path: build/dist/releases/webmail/2.*/rainloop-webmail-fork-2.*.zip*
         if-no-files-found: error

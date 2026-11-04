@@ -3,7 +3,8 @@
 if (PHP_SAPI !== 'cli' || $argc !== 3) exit(1);
 $root = realpath($argv[1]);
 $artifact = realpath($argv[2]);
-if (!$root || !$artifact || json_decode(file_get_contents($root . '/package.json'), true)['version'] !== '1.17.0') {
+if (!$artifact) throw new RuntimeException('Release ZIP does not exist: ' . $argv[2]);
+if (!$root || json_decode(file_get_contents($root . '/package.json'), true)['version'] !== '1.17.0') {
     throw new RuntimeException('Expected a disposable archived 1.17.0 source checkout and a release ZIP');
 }
 rename($root . '/rainloop/v/0.0.0', $root . '/rainloop/v/1.17.0');

@@ -108,7 +108,7 @@ custom themes and plugins against the changed editor, controls and markup.
   dependency resolution; lint and archive generation exercise the changed version.
 - The maintained build produces `rainloop-webmail-fork-2.0.0.zip` with the correct
   versioned directory/entry point, hidden protection files, CLI admin tool,
-  documentation and third-party license inventory. It does not build the removed
+  documentation, third-party license inventory and a companion SHA-256 checksum. It does not build the removed
   legacy ownCloud integration. The old PHP 5 Debian-package script is retired;
   use the versioned ZIP or the distroless runtime deployment.
 - Rebuilt PHP-FPM as a multi-stage **distroless Debian 13 nonroot** runtime, UID/GID
@@ -135,7 +135,8 @@ Third-party code keeps its own terms; the core license does not relicense it.
 
 `THIRD_PARTY_NOTICES.txt` and generated `licenses/` metadata record the review.
 The replacement editor, gallery and QR package use MIT terms. OpenPGP.js retains
-LGPL-3.0-or-later obligations, including a Corresponding Source/distribution plan.
+LGPL-3.0-or-later obligations. The release includes its checksum-verified
+preferred source archive and replacement/build instructions under `licenses/sources/`.
 Some legacy PHP/asset license provenance remains incomplete. Keeping the original
 name with a fork label is not a determination of trademark rights or endorsement.
 Complete those release-license checks before public distribution.

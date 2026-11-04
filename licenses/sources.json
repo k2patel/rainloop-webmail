@@ -1,0 +1,11 @@
+[
+  {
+    "name": "openpgpjs",
+    "version": "6.3.2",
+    "license": "LGPL-3.0-or-later",
+    "file": "openpgpjs-6.3.2-source.tar.gz",
+    "url": "https://codeload.github.com/openpgpjs/openpgpjs/tar.gz/refs/tags/v6.3.2",
+    "sha256": "1e0b14b06e18a958960c36749c02b575c0bd16df2b6b8bf3ed5c11938e61ff05",
+    "package": "openpgp"
+  }
+]
