@@ -3,7 +3,7 @@
   "title": "RainLoop Webmail",
   "description": "Independently maintained RainLoop Webmail 2.x fork",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://github.com/k2patel/rainloop-webmail",
   "author": {
     "name": "RainLoop Team",

@@ -59,18 +59,20 @@ yarn build
 The output is:
 
 ```text
-build/dist/releases/webmail/2.0.0/rainloop-webmail-fork-2.0.0.zip
+build/dist/releases/webmail/2.0.1/rainloop-webmail-fork-2.0.1.zip
 ```
 
 The adjacent `.zip.sha256` file contains the archive's SHA-256 checksum. Verify
-it before extracting; for example `sha256sum -c rainloop-webmail-fork-2.0.0.zip.sha256`
+it before extracting; for example `sha256sum -c rainloop-webmail-fork-2.0.1.zip.sha256`
 on Linux, or compare `sha256`/`shasum -a 256` output on OpenBSD/macOS. A checksum
 detects a mismatched or damaged download; it is not a maintainer signature.
 
 Use the version named by the release when a later 2.x version is available.
-The package contains a generated `index.php` and `rainloop/v/2.0.0/` tree,
-license notices, documentation and the local admin-password tool. Development
-sources deliberately use `rainloop/v/0.0.0/`; do not rename that directory manually.
+The package contains a generated `index.php` and `rainloop/v/2.0.1/` tree,
+with only `data/`, `rainloop/` and the root `index.php` at the top level. Required
+notices/source are in `rainloop/v/2.0.1/app/licenses/`, and the admin-password
+tool is in `rainloop/v/2.0.1/app/bin/`. Deployment/build documentation stays in
+the GitHub repository. Development sources deliberately use `rainloop/v/0.0.0/`; do not rename that directory manually.
 Node, Yarn and build tools are not required on the production PHP host.
 
 ## 3. Stage a separate installation
@@ -101,12 +103,12 @@ password of at least 12 characters, run as the application user with access to
 the intended data directory:
 
 ```sh
-php tools/set-admin-password.php
+php rainloop/v/2.0.1/app/bin/set-admin-password.php
 ```
 
 Supply the password on standard input. The CLI must use the same installation
 and data-path configuration as PHP-FPM. For MULTIPLY, also set `HTTP_HOST` to the
-intended tenant, for example `HTTP_HOST=mail.example.com php tools/set-admin-password.php`.
+intended tenant, for example `HTTP_HOST=mail.example.com php rainloop/v/2.0.1/app/bin/set-admin-password.php`.
 
 **TLS:** new configurations verify mail-server certificates. Existing settings
 are retained; review `[ssl] verify_certificate = On` and
@@ -164,7 +166,7 @@ The original `/data*` restriction already protected that path. The new example
 also limits which scripts/static paths are reachable. Its 25 MiB request limit
 includes multipart overhead. The Nginx example is in `.docker/nginx/default.conf`.
 Verify that a direct request for `/data/SALT.php`, `/.git/config` or internal
-`/rainloop/v/2.0.0/app/` paths is denied before making the site available.
+`/rainloop/v/2.0.1/app/` paths is denied before making the site available.
 
 ## 6. Distroless Docker deployments
 
@@ -196,6 +198,8 @@ Run PHP tools by specifying their executable, rather than `docker exec ... sh`:
 docker compose run --rm -T --entrypoint /usr/local/bin/php php tools/set-admin-password.php
 ```
 
+This command uses the source checkout. If your container mounts the install ZIP
+instead, use `rainloop/v/2.0.1/app/bin/set-admin-password.php` as the script path.
 Supply the new password over standard input. A read-only application mount
 prevents in-place updates; deploy a new artifact and reload/recreate the runtime
 for each subsequent update.
@@ -232,18 +236,19 @@ web root, while preserving the existing data directory.
 After the backup and staging checks above:
 
 1. Stop application writes or put the site into maintenance mode.
-2. Copy the complete packaged `rainloop/v/2.0.0/` directory into `rainloop/v/`,
+2. Copy the complete packaged `rainloop/v/2.0.1/` directory into `rainloop/v/`,
    beside `1.17.0/`. Include its PHP, templates, themes and generated static assets.
    Do not overlay its contents onto the old `1.17.0/` tree.
 3. Keep your existing `data/` directory (or external data mapping), root custom
    `include.php`, and `MULTIPLY` file. **Do not copy the archive's fresh `data/`
    directory over your installation.** Preserve `SALT.php` and `DATA.php`.
-4. Install the maintained release's `tools/`, `docs/` and license notices as needed.
-   Keep these support/private paths denied by your web-server rules.
-5. Save a copy of the old root `index.php`. Replace it with the packaged 2.0.0 root
+4. Keep the complete new version tree, including its protected `app/bin/` admin
+   helper and `app/licenses/` notices/source. Deployment tools and documentation
+   are available in the repository and are not installed at the web root.
+5. Save a copy of the old root `index.php`. Replace it with the packaged 2.0.1 root
    `index.php` only after the new version tree is completely present. It defines
-   `APP_VERSION` as `2.0.0`. With this specific entry-point format, changing that
-   constant to `2.0.0` has the same routing effect, but prefer the packaged entry
+   `APP_VERSION` as `2.0.1`. With this specific entry-point format, changing that
+   constant to `2.0.1` has the same routing effect, but prefer the packaged entry
    point so future entry-point changes are included. Never switch it before the
    new directory exists, or the application will return `[105] Missing version directory`.
 6. Reload/restart PHP-FPM to invalidate OPcache, reload browser tabs, and verify
@@ -290,3 +295,28 @@ The optional Node build image now uses Node 24. The translation tool is the
 Go-based Transifex CLI 1.6.17 in a nonroot distroless image, replacing the old Python
 3.6 client. Its cache/home mount changes from `/root` to `/home/nonroot`; copy any
 needed tool configuration separately and ensure the tool user can access it.
+
+## OpenBSD: installed cURL is not loaded
+
+The cURL startup requirement also existed in 1.x. Installing `php-curl` alone
+does not ensure the serving PHP-FPM version has enabled it. For an installed
+PHP 8.3/cURL 8.3 pair, enable the package's sample configuration if it is absent:
+
+```sh
+mkdir -p /etc/php-8.3
+ln -s /etc/php-8.3.sample/curl.ini /etc/php-8.3/curl.ini
+rcctl restart php83_fpm
+```
+
+If the file already exists, inspect it instead of overwriting it. Check the
+active FPM service and its configuration if the error persists; CLI PHP may load
+a different configuration:
+
+```sh
+rcctl ls started | grep php
+php-8.3 --ini
+php-8.3 -m | grep -i curl
+```
+
+Use the paths/service matching your installed PHP version. The `p0`/`p1` package
+revision suffixes do not change the PHP 8.3 module directory.

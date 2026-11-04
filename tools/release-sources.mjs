@@ -26,5 +26,7 @@ export async function collectReleaseSources(destination) {
   }
   await fs.writeFile(path.join(target, source.file), bytes);
  }
- await fs.copyFile('licenses/SOURCES.md', path.join(target, 'README.md'));
+ const version = JSON.parse(await fs.readFile('package.json', 'utf8')).version;
+ const instructions = (await fs.readFile('licenses/SOURCES.md', 'utf8')).replaceAll('rainloop/v/2.0.0/', `rainloop/v/${version}/`);
+ await fs.writeFile(path.join(target, 'README.md'), instructions);
 }

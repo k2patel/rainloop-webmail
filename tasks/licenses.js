@@ -50,32 +50,31 @@ exports.collectLicenses = function(destination) {
 	const project = path.resolve(__dirname, '..'),
 		output = path.join(destination, 'licenses'),
 		seen = new Set(),
-		inventory = [];
+		inventory = [],
+		licenseTexts = [];
 	fs.mkdirSync(output, { recursive: true });
 	function collect(name, from) {
 		const directory = packageRoot(name, from);
 		if (seen.has(directory)) return;
 		seen.add(directory);
-		const metadata = JSON.parse(fs.readFileSync(path.join(directory, 'package.json'), 'utf8')),
-			target = path.join(output, 'npm', metadata.name + '-' + metadata.version);
-		fs.mkdirSync(target, { recursive: true });
+		const metadata = JSON.parse(fs.readFileSync(path.join(directory, 'package.json'), 'utf8'));
 		const files = fs
 			.readdirSync(directory)
 			.filter(
 				(file) =>
 					/^(mit[-_])?(licen[cs]e|copying|notice)([.\-_]|$)/i.test(file) && fs.statSync(path.join(directory, file)).isFile()
 			);
-		for (const file of files) fs.copyFileSync(path.join(directory, file), path.join(target, file));
+		for (const file of files) licenseTexts.push('===== ' + metadata.name + '@' + metadata.version + ' / ' + file + ' =====\n' + fs.readFileSync(path.join(directory, file), 'utf8'));
 		if (name === 'qrcode-generator' && !files.length) {
-			fs.copyFileSync(path.join(project, 'licenses/qrcode-generator-MIT.txt'), path.join(target, 'LICENSE'));
+			licenseTexts.push('===== qrcode-generator@' + metadata.version + ' / LICENSE =====\n' + fs.readFileSync(path.join(project, 'licenses/qrcode-generator-MIT.txt'), 'utf8'));
 			files.push('LICENSE');
 		}
-		fs.copyFileSync(path.join(directory, 'package.json'), path.join(target, 'package.json'));
 		inventory.push({
 			name: metadata.name,
 			version: metadata.version,
 			declaredLicense: metadata.license || metadata.licenses || null,
 			licenseFiles: files,
+			licenseTextFile: 'THIRD_PARTY_LICENSES.txt',
 			reviewRequired: files.length === 0
 		});
 		for (const dependency of Object.keys(metadata.dependencies || {})) collect(dependency, directory);
@@ -84,18 +83,18 @@ exports.collectLicenses = function(destination) {
 	for (const file of fs.readdirSync(path.join(project, 'licenses'))) {
 		fs.copyFileSync(path.join(project, 'licenses', file), path.join(output, file));
 	}
+	// Runtime PHP sources retain their own adjacent notices; collect only vendor
+	// notices needed by the compiled browser assets, without duplicating trees.
 	function bundled(directory) {
 		for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
 			const file = path.join(directory, entry.name);
 			if (entry.isDirectory()) bundled(file);
-			else if (/^(licen[cs]e|copying|notice|gnu-lgpl)([.\-_]|$)/i.test(entry.name)) {
-				const target = path.join(output, 'bundled', path.relative(project, file));
-				fs.mkdirSync(path.dirname(target), { recursive: true });
-				fs.copyFileSync(file, target);
+			else if (/^(licen[cs]e|copying|notice)([.\-_]|$)/i.test(entry.name)) {
+				licenseTexts.push('===== ' + path.relative(project, file) + ' =====\n' + fs.readFileSync(file, 'utf8'));
 			}
 		}
 	}
-	for (const directory of ['vendors', 'plugins', 'rainloop/v/0.0.0/app/libraries'])
-		bundled(path.join(project, directory));
+	bundled(path.join(project, 'vendors'));
+	fs.writeFileSync(path.join(output, 'THIRD_PARTY_LICENSES.txt'), licenseTexts.join('\n\n') + '\n');
 	fs.writeFileSync(path.join(output, 'runtime-packages.json'), JSON.stringify(inventory, null, 2) + '\n');
 };

@@ -95,14 +95,15 @@ async function release() {
  const index = (await read('index.php')).replace("'APP_VERSION', '0.0.0'", `'APP_VERSION', '${pkg.version}'`);
  await write(`${dist}/index.php`, index);
  await write(`${dist}/rainloop/v/${pkg.version}/index.php.root`, index);
- for (const file of ['LICENSE', 'README.md', 'THIRD_PARTY_NOTICES.txt']) await copy(file, `${dist}/${file}`);
- await copy('tools/set-admin-password.php', `${dist}/tools/set-admin-password.php`);
- await copy('docs', `${dist}/docs`);
- await copy('build/openbsd', `${dist}/build/openbsd`);
- await copy('.docker/php', `${dist}/.docker/php`);
- await copy('.docker/nginx/default.conf', `${dist}/.docker/nginx/default.conf`);
- collectLicenses(dist);
- await collectReleaseSources(dist);
+ const app = `${dist}/rainloop/v/${pkg.version}/app`;
+ for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.txt']) await copy(file, `${app}/licenses/${file}`);
+ const originalBootstrap = "require dirname(__DIR__) . '/index.php';";
+ const helper = await read('tools/set-admin-password.php');
+ if (!helper.includes(originalBootstrap)) throw new Error('Admin helper bootstrap needs packaging review');
+ await write(`${app}/bin/set-admin-password.php`, helper.replace(originalBootstrap,
+  "require dirname(__DIR__, 5) . '/index.php';"));
+ collectLicenses(app);
+ await collectReleaseSources(app);
  const target = `${root}/rainloop-webmail-fork-${pkg.version}.zip`;
  const stream = createWriteStream(target);
  const archive = new ZipArchive({ zlib: { level: 9 } });

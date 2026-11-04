@@ -54,4 +54,7 @@ if ($phase === 'create') {
     $config->Set('security', 'admin_password', '12345');
     if ($config->ValidatePassword('12345')) throw new RuntimeException('Legacy default admin accepted');
     echo "Packaged " . APP_VERSION . " reads archived data, admin password and user settings without changing salt/database\n";
+} elseif ($phase === 'verify-admin-tool') {
+    if (!$config->ValidatePassword('migration-cli-fixture-password')) throw new RuntimeException('Packaged admin password was not saved');
+    echo "Packaged admin-password helper selected the correct application/data root\n";
 } else throw new RuntimeException('Unknown phase');

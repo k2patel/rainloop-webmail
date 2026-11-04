@@ -20,13 +20,21 @@
 <script src="../node_modules/qrcode-generator/dist/qrcode.js"></script>
 <script type="module">
 import HtmlEditor from '../dev/Common/HtmlEditor.js';
+import { connectHashRouting } from '../dev/Knoin/HashRouting.js';
 let count=0;
 const check=(name,condition)=>{if(!condition)throw new Error(name);count++;const row=document.createElement('li');row.textContent=name;document.getElementById('checks').append(row);};
 try {
+ const router=crossroads.create(), visited=[];
+ router.addRoute(/^(.+)$/,route=>visited.push(route));
+ connectHashRouting(hasher,router);
+ for(let i=0;i<80;i++) hasher.setHash(['settings/general','settings/security','mailbox/INBOX','mailbox/Sent'][i%4]);
+ check('Repeated hash changes reach settings and mailbox routes',visited.length===80&&visited[79]==='mailbox/Sent');
+ hasher.stop();hasher.initialized.removeAll();hasher.changed.removeAll();
  check('jQuery 4 loads', jQuery.fn.jquery==='4.0.0');
  check('jQuery UI 1.14 loads',jQuery.ui.version==='1.14.2');
  check('Knockout current release loads',ko.version==='3.5.3');
  let shortcutCount=0; key('insert',['scope-one','scope-two'],()=>shortcutCount++);key.setScope('scope-two');document.dispatchEvent(new KeyboardEvent('keydown',{keyCode:45,bubbles:true}));check('Multiple-scope Insert shortcut',shortcutCount===1);key.setScope('all');
+ jQuery('#sort').resizable({handles:'e'});check('Mailbox panel resize initializes',!!jQuery('#sort').resizable('instance')&&!!document.querySelector('#sort .ui-resizable-e'));jQuery('#sort').resizable('disable');check('Mailbox panel resize disables',jQuery('#sort').resizable('option','disabled'));jQuery('#sort').resizable('enable');jQuery('#sort').resizable('destroy');
  jQuery('#sort').sortable(); check('Sortable initializes',!!jQuery('#sort').sortable('instance'));jQuery('#sort').sortable('destroy');
  jQuery('#addresses').inputosaurus({}); check('Recipient input initializes',!!jQuery('#addresses').inputosaurus('instance'));
 

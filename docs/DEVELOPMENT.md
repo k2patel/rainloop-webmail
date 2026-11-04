@@ -51,9 +51,13 @@ To test the manual in-place upgrade against the immutable archived baseline, bui
 a release and run from a full-history source checkout with PHP and Git available:
 
 ```sh
-sh tests/upgrade-in-place.sh build/dist/releases/webmail/2.0.0/rainloop-webmail-fork-2.0.0.zip
+sh tests/upgrade-in-place.sh build/dist/releases/webmail/2.0.1/rainloop-webmail-fork-2.0.1.zip
 ```
 
 This uses disposable data and the packaged entry point. It must never be pointed
 at a real installation directory. The PHP workflow runs the fixture after building
 the frontend/release artifact.
+
+Installable ZIPs contain only `index.php`, `data/`, and `rainloop/` at their root.
+Build/deployment documentation stays in the repository. Required notices/source
+and the CLI admin helper are packaged inside the protected versioned `app/` tree.

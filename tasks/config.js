@@ -50,6 +50,7 @@ config.paths.css = {
 			'node_modules/normalize.css/normalize.css',
 			'node_modules/jquery-ui/themes/base/core.css',
 			'node_modules/jquery-ui/themes/base/sortable.css',
+			'node_modules/jquery-ui/themes/base/resizable.css',
 			'node_modules/jquery-ui/themes/base/menu.css',
 			'node_modules/jquery-ui/themes/base/autocomplete.css',
 			'node_modules/jquery-ui/themes/base/theme.css',
@@ -81,7 +82,7 @@ config.paths.js = {
 			'node_modules/jquery-mousewheel/jquery.mousewheel.js',
 			'node_modules/jquery-scrollstop/jquery.scrollstop.js',
 			'node_modules/jquery-backstretch/jquery.backstretch.min.js',
-			...[ 'version', 'widget', 'data', 'disable-selection', 'focusable', 'keycode', 'labels', 'plugin', 'position', 'scroll-parent', 'tabbable', 'unique-id', 'widgets/mouse', 'widgets/draggable', 'widgets/droppable', 'widgets/sortable', 'widgets/menu', 'widgets/autocomplete' ].map((name) => 'node_modules/jquery-ui/ui/' + name + '.js'),
+			...[ 'version', 'widget', 'data', 'disable-selection', 'focusable', 'keycode', 'labels', 'plugin', 'position', 'scroll-parent', 'tabbable', 'unique-id', 'widgets/mouse', 'widgets/resizable', 'widgets/draggable', 'widgets/droppable', 'widgets/sortable', 'widgets/menu', 'widgets/autocomplete' ].map((name) => 'node_modules/jquery-ui/ui/' + name + '.js'),
 			'vendors/inputosaurus/inputosaurus.js', // custom (modified)
 			'node_modules/signals/dist/signals.min.js', // fixed
 			'node_modules/hasher/dist/js/hasher.min.js', // fixed

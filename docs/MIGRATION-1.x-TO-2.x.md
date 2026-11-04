@@ -3,7 +3,7 @@
 The archived 1.17.0 code is being continued as **RainLoop Webmail 2.0.0**, an
 independently maintained fork. The maintainer actively uses the application and
 is updating it for continued use. The RainLoop Webmail name stays, with a
-prominent “forked from archived RainLoop” notice. Changes are maintained here;
+prominent repository “forked from archived RainLoop” notice. Changes are maintained here;
 they are not intended for merge-back into the archived upstream project.
 
 This is a summary of the maintenance work, not an announcement that a public
@@ -164,3 +164,28 @@ that every exploit has been removed. Native OpenBSD configuration validation,
 authenticated IMAP/SMTP testing, enabled-plugin coverage, full PHP dependency
 migrations and outstanding license provenance/source obligations remain separate
 work before treating the fork as a fully reviewed production release.
+
+## Packaging follow-up: 2.0.1
+
+The install ZIP now matches the original 1.x top-level layout: `data/`,
+`rainloop/`, and root `index.php`. Repository documentation, Docker examples and
+build support directories are excluded. Required notices are consolidated under
+`rainloop/v/2.0.1/app/licenses/`, including the matching OpenPGP source. The
+admin-password CLI lives at `rainloop/v/2.0.1/app/bin/set-admin-password.php`.
+Existing readable/debug assets, languages and themes remain available.
+
+The fork notice is kept in the repository/documentation; user and admin sign-in
+pages retain the application branding without an added fork banner.
+
+The shared hash-navigation connection now forwards only the new fragment to
+Crossroads. Passing Hasher’s previous-fragment string as Crossroads’ route-argument
+array caused repeated navigation to throw `CreateListFromArrayLike called on
+non-object`, preventing settings and mailbox route changes. Browser regressions
+exercise 80 successive settings/mailbox hash changes; a full local admin session
+also completed 80 menu clicks with the expected selected panel and no uncaught
+JavaScript errors.
+
+The browser bundle also restores jQuery UI’s resizable widget and styles, required
+by mailbox layout initialization. Without it, authenticated startup threw
+`resizable is not a function`. Browser checks cover creation, disable/enable and
+cleanup of a resizable panel.

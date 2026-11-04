@@ -25,6 +25,7 @@ $version = $match[1];
 $prefix = 'rainloop/v/' . $version . '/';
 for ($i = 0; $i < $zip->numFiles; ++$i) {
     $name = $zip->getNameIndex($i);
+    if (!in_array(explode('/', $name)[0], ['data', 'rainloop', 'index.php'], true)) throw new RuntimeException('Non-runtime top-level path in install ZIP: ' . $name);
     if (str_contains($name, '../') || str_contains($name, '\\') || str_starts_with($name, '/')) throw new RuntimeException('Unsafe artifact path');
     // Copy only the new version; intentionally never extract the package's data/.
     if (!str_starts_with($name, $prefix)) continue;
@@ -38,7 +39,16 @@ for ($i = 0; $i < $zip->numFiles; ++$i) {
 }
 copy($root . '/index.php', $root . '/index.php.before-v2');
 file_put_contents($root . '/index.php', $index);
+if ($zip->getFromName($prefix . 'app/licenses/LICENSE') !== file_get_contents(dirname(__DIR__, 2) . '/LICENSE')) throw new RuntimeException('Core license missing or changed');
+if ($zip->locateName($prefix . 'app/.htaccess') === false) throw new RuntimeException('Private-directory protection missing');
 $zip->close();
 if (!is_dir($root . '/rainloop/v/1.17.0') || !is_dir($root . '/rainloop/v/' . $version)) throw new RuntimeException('Side-by-side version trees missing');
 phase('verify', $root);
-echo "Manual in-place version-directory upgrade passed\n";
+$helper = $root . '/' . $prefix . 'app/bin/set-admin-password.php';
+$process = proc_open([PHP_BINARY, $helper], [0 => ['pipe', 'r'], 1 => STDOUT, 2 => STDERR], $pipes);
+if (!is_resource($process)) throw new RuntimeException('Cannot start packaged admin helper');
+fwrite($pipes[0], "migration-cli-fixture-password\n");
+fclose($pipes[0]);
+if (proc_close($process) !== 0) throw new RuntimeException('Packaged admin helper failed');
+phase('verify-admin-tool', $root);
+echo "Manual in-place version-directory upgrade and packaged admin helper passed\n";

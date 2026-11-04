@@ -56,7 +56,8 @@ The default admin password is disabled, including the old `12345` password in
 existing configurations. Set a password locally with
 `php tools/set-admin-password.php`, entering it on standard input. Run this as
 the application user with access to its data directory; the CLI must have the
-same data-path configuration as PHP-FPM. For MULTIPLY installations, set
+same data-path configuration as PHP-FPM. In the installable ZIP, use
+`php rainloop/v/2.0.1/app/bin/set-admin-password.php`; `tools/` is the source-checkout path. For MULTIPLY installations, set
 `HTTP_HOST` to the intended tenant when running the command.
 
 New installations verify mail-server certificates and reject self-signed

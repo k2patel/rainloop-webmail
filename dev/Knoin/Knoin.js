@@ -2,6 +2,7 @@ import _ from '_';
 import $ from '$';
 import ko from 'ko';
 import hasher from 'hasher';
+import { connectHashRouting } from './HashRouting';
 import crossroads from 'crossroads';
 
 import { Magics } from 'Common/Enums';
@@ -428,9 +429,7 @@ export function startScreens(screensClasses) {
 	const cross = crossroads.create();
 	cross.addRoute(/^([a-zA-Z0-9-]*)\/?(.*)$/, screenOnRoute);
 
-	hasher.initialized.add(cross.parse, cross);
-	hasher.changed.add(cross.parse, cross);
-	hasher.init();
+	connectHashRouting(hasher, cross);
 
 	_.delay(() => $html.removeClass('rl-started-trigger').addClass('rl-started'), 100);
 	_.delay(() => $html.addClass('rl-started-delay'), 200);
