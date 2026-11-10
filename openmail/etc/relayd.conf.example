@@ -1,0 +1,28 @@
+# Merge into /etc/relayd.conf; replace the domain and certificate paths.
+# OpenMail serves health routes; mailbox and JMAP support are still pending.
+# Replace this documentation address with the intended local HTTPS listen IP.
+openmail_addr = "192.0.2.10"
+
+# Backend stays on localhost; OpenMail must listen on 127.0.0.1:8080.
+table <openmail_web> { 127.0.0.1 }
+
+http protocol "openmail_https" {
+	tls keypair "mail.example.com" cert "/etc/ssl/mail.example.com.fullchain.pem"
+	tls keypair "mail.example.com" key "/etc/ssl/private/mail.example.com.key"
+
+	# Replace client-supplied proxy metadata at this trusted edge.
+	match request header remove "Forwarded"
+	match request header remove "X-Forwarded-Host"
+	match request header remove "X-Forwarded-Port"
+	match request header set "X-Forwarded-For" value "$REMOTE_ADDR"
+	match request header set "X-Forwarded-Proto" value "https"
+
+	return error
+}
+
+relay "openmail_https" {
+	listen on $openmail_addr port 443 tls
+	protocol "openmail_https"
+	session timeout 600
+	forward to <openmail_web> port 8080 check tcp
+}

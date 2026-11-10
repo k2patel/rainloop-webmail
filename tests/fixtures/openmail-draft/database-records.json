@@ -1,0 +1,85 @@
+{
+  "_note": "Temporary design fixture; logical database rows, not a JMAP response or executable migration.",
+  "domains": [
+    {
+      "name": "example.com",
+      "enabled": true
+    }
+  ],
+  "accounts": [
+    {
+      "id": "acct_demo",
+      "login": "alice@example.com",
+      "enabled": true,
+      "quota_bytes": 1073741824
+    }
+  ],
+  "addresses": [
+    {
+      "address": "alice@example.com",
+      "account_id": "acct_demo"
+    }
+  ],
+  "aliases": [
+    {
+      "source_address": "postmaster@example.com",
+      "destination_address": "alice@example.com"
+    }
+  ],
+  "mailboxes": [
+    {
+      "id": "mb_inbox",
+      "account_id": "acct_demo",
+      "name": "Inbox",
+      "role": "inbox"
+    },
+    {
+      "id": "mb_archive",
+      "account_id": "acct_demo",
+      "name": "Archive",
+      "role": "archive"
+    }
+  ],
+  "blobs": [
+    {
+      "id": "blob_demo",
+      "account_id": "acct_demo",
+      "storage_key": "accounts/acct_demo/blobs/d2/d27e8dae1f5a9e5c4598e58872b74b00800964c0d3d2bf97dee73f3c6e1ee5d4.eml",
+      "sha256": "d27e8dae1f5a9e5c4598e58872b74b00800964c0d3d2bf97dee73f3c6e1ee5d4",
+      "size_bytes": 639
+    }
+  ],
+  "emails": [
+    {
+      "id": "email_demo",
+      "account_id": "acct_demo",
+      "blob_id": "blob_demo",
+      "thread_id": "thread_demo",
+      "message_id_header": "<sample-001@example.net>",
+      "received_at": "2026-11-09T15:00:00Z"
+    }
+  ],
+  "email_mailboxes": [
+    {
+      "account_id": "acct_demo",
+      "email_id": "email_demo",
+      "mailbox_id": "mb_inbox"
+    }
+  ],
+  "email_keywords": [],
+  "account_state": [
+    {
+      "account_id": "acct_demo",
+      "sequence": 1
+    }
+  ],
+  "changes": [
+    {
+      "account_id": "acct_demo",
+      "sequence": 1,
+      "object_type": "Email",
+      "object_id": "email_demo",
+      "operation": "created"
+    }
+  ]
+}

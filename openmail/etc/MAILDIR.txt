@@ -1,0 +1,78 @@
+Read-only Maildir indexing
+===========================
+
+OpenMail can now scan one Maildir source into its own SQLite database. This is
+a local operator command, not an authenticated webmail endpoint. The daemon
+still serves only status routes, and /readyz remains 503.
+
+Configure absolute paths in /etc/openmail/config.toml:
+  [maildir]
+  root = "/var/mail/alice/Maildir"
+  database = "/var/db/openmail/alice/index.sqlite"
+
+The source must already have tmp, new, and cur directories. Maildir++ folders
+such as .Archive and .Archive.Projects are recognized under the root when any
+of the three directory markers exists; each recognized mailbox must contain all
+three. Hidden directories with none of those markers are ignored.
+tmp and hidden message files are ignored. Files and folder names must be UTF-8;
+message files are limited to 64 MiB in this first implementation.
+
+An operator creates the database parent directory separately, private to the
+account running the scan (0700 recommended). The scanner creates the database
+with mode 0600; existing file permissions are the operator's responsibility.
+Keep the database outside the Maildir tree. Config validation rejects a direct
+overlap, and --scan resolves parent paths before creating the database.
+Keep ancestor directories and database files under trusted local ownership.
+The scanner rejects message/directory symlinks it opens and uses relative
+directory handles to avoid following swapped message paths outside the source.
+Unrelated hidden directories and non-directory folder candidates are ignored.
+
+Run as the account with read access to this Maildir and write access to the
+private database directory:
+  openmail -n -f /etc/openmail/config.toml
+  openmail --scan -f /etc/openmail/config.toml
+
+-n checks configuration syntax and path shape without opening the Maildir or
+database. --scan opens both, prints counts and the committed local state, then
+exits. It does not start HTTP, poll in the background, or modify source mail.
+The normal daemon does not use [maildir] yet; this makes adapter validation
+independent of authentication and web/API implementation.
+
+Index behavior
+--------------
+Original bytes remain in Maildir. OpenMail streams each file to compute SHA-256
+and keeps its size, relative locator, normalized flags, mailbox ID, and email ID.
+SHA-256 detects a changed file; it is not the email identity or a deduplication
+key. Separate deliveries with identical contents retain separate IDs.
+
+A message's key is its filename before the Maildir info suffix. Its ID stays
+stable across restart, new-to-cur transitions and flag changes within that
+mailbox. A content replacement gets a new ID. Folder moves/renames performed
+externally are conservatively treated as removal plus addition in this version.
+Deletion leaves tombstones; reappearing messages get new IDs rather than reusing
+destroyed objects. Preserve this database in backups to preserve public IDs.
+
+SQLite BEGIN IMMEDIATE serializes scans before snapshot collection. Successful
+reconciliation commits IDs, flags, removals and change records together. A scan
+that encounters missing/incomplete directories, ambiguous duplicate names,
+unreadable/oversize/unstable files, or an SQL error rolls back index changes.
+Concurrent delivery/renames may make a scan fail; retry after activity settles.
+The filesystem is not transactionally snapshotted: external changes after an
+entry is read are observed on the next scan. This first version hashes all
+messages on every scan and is intended for correctness checks before tuning.
+
+Schema v1 is defined in src/schema.sql. The database is bound to one canonical
+source root; it refuses another root and rejects unrelated/newer database
+schemas. IDs are random opaque strings retained in tombstoned rows. The local
+change sequence is groundwork for sync, not an implemented JMAP state API.
+
+OpenSMTPD can continue delivering directly to this Maildir. No LMTP listener
+or Dovecot process is required to scan it. Do not change delivery ownership or
+configuration based solely on this read-only milestone.
+
+Build dependency notes
+----------------------
+The SQLite binding requires Rust 1.89+. rusqlite builds a bundled SQLite library
+with the system C compiler; the installed executable needs no separate SQLite
+server. rustix supplies safe directory-relative filesystem calls; sha2 supplies
+streaming hashing. Dependency versions are recorded in Cargo.lock.

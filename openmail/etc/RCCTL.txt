@@ -1,0 +1,48 @@
+OpenMail as an OpenBSD service
+===============================
+
+Build on the target OpenBSD host with Rust 1.89+ and make. The Makefile stages
+the binary and example files; it never edits OpenSMTPD or starts services.
+The rc.d script follows rc.subr conventions, but needs a native OpenBSD test.
+
+Before enabling the service, an administrator must:
+- Create the dedicated _openmail service account with no interactive login.
+- Install the binary as /usr/local/bin/openmail (or adjust daemon in the script).
+- Install etc/rc.d/openmail as /etc/rc.d/openmail, root-owned, executable (0555).
+- Run make install-config for an initial /etc/openmail/config.toml, or install
+  the example manually. The target refuses an existing file or symlink.
+- Keep /etc/openmail root-owned with group _openmail and mode 0750, and its
+  config.toml root:_openmail with mode 0640 (create the service group first).
+  install-config does not choose a service group; the operator sets ownership.
+  Configuration is required; a missing default file now fails startup.
+
+Check configuration and start:
+  /usr/local/bin/openmail -n -f /etc/openmail/config.toml
+  rcctl configtest openmail
+  rcctl enable openmail
+  rcctl start openmail
+  rcctl check openmail
+
+Then test locally (or use an SSH tunnel to the host):
+  curl --fail http://127.0.0.1:8080/healthz
+  curl -i http://127.0.0.1:8080/readyz
+
+The first request returns 200. Readiness returns 503 while mailbox support is
+unimplemented. A running process is not a ready mailbox server.
+
+The daemon runs in the foreground; rc.subr backgrounds it using rc_bg=YES.
+The script logs stdout/stderr through daemon.info, usually to /var/log/daemon.
+SIGTERM and SIGINT trigger bounded draining. Reload is deliberately disabled;
+apply configuration changes with rcctl restart openmail. SIGTERM shutdown may
+take up to ten seconds; a drain timeout is reported as failure.
+
+The normal daemon does not open OpenSMTPD, the metadata database, or mailbox
+files yet. The separate --scan command reads a configured Maildir and writes
+its SQLite index; see MAILDIR.txt for permissions and configuration. Do not
+grant broad access to other users' mail just to run the HTTP status service.
+See RELAYD.txt for HTTPS. OpenMail rejects non-loopback HTTP binds.
+Use man openmail and man openmail.conf for the installed manuals. On OpenBSD,
+pledge and unveil are applied after trusted startup preparation; a sandbox
+setup error stops execution. Linux/macOS do not enforce those contracts.
+
+Reference: https://man.openbsd.org/rc.subr

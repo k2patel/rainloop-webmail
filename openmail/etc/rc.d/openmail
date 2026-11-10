@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+daemon="/usr/local/bin/openmail"
+daemon_flags="-f /etc/openmail/config.toml"
+daemon_user="_openmail"
+daemon_logger="daemon.info"
+
+. /etc/rc.d/rc.subr
+
+rc_bg=YES
+rc_reload=NO
+
+rc_configtest() {
+	rc_exec "${daemon} -n ${daemon_flags}"
+}
+
+rc_cmd "$1"

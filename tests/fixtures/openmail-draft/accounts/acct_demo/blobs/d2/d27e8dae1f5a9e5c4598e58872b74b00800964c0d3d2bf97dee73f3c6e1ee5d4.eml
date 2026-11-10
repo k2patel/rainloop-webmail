@@ -1,0 +1,20 @@
+From: Sender <sender@example.net>
+To: Alice <alice@example.com>
+Date: Mon, 09 Nov 2026 10:00:00 -0500
+Message-ID: <sample-001@example.net>
+Subject: Local storage example
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="draft-boundary-001"
+
+--draft-boundary-001
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+Hello Alice. This is synthetic mail for the Rust/JMAP storage draft.
+--draft-boundary-001
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: attachment; filename="notes.txt"
+Content-Transfer-Encoding: base64
+
+U3ludGhldGljIGF0dGFjaG1lbnQuCg==
+--draft-boundary-001--

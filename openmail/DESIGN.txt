@@ -1,0 +1,135 @@
+OpenMail: source and build conventions
+======================================
+
+Purpose
+-------
+OpenMail owns mailbox storage, JMAP access, and the web interface. OpenSMTPD
+owns SMTP transport and queueing. Use small explicit interfaces between them.
+The first local backend targets one OpenBSD host, SQLite metadata, and Maildir.
+IMAP and POP3 are also planned source types; see BACKENDS.txt for the source
+review and capability differences. JMAP is the browser-facing API, not an
+additional upstream backend in this scope.
+Deploy one package, executable and rc.d service. The eventual browser UI source
+will live under web/ with built assets embedded in the executable; no separately
+installed openmail-web package or frontend runtime is planned.
+
+Current status
+--------------
+The executable loads TOML configuration and serves HTTP on 127.0.0.1:8080 by
+default. It supports -f config, -n configuration checking, --help, and --version.
+It also supports --scan for explicit read-only Maildir indexing into SQLite.
+It runs in the foreground and drains requests on SIGTERM/SIGINT, with a ten
+second shutdown deadline. Configuration is required even at the default path
+/etc/openmail/config.toml. An empty file selects the local defaults. Reject
+non-regular files, invalid UTF-8, unknown settings, and files over 64 KiB.
+System settings live in /etc/openmail; writable state must stay elsewhere.
+Only loopback HTTP listeners are accepted; expose HTTPS through relayd.
+
+/ returns a plain service notice. /healthz returns 200 for process liveness.
+/readyz returns 503 until a mailbox backend is implemented; JMAP discovery
+currently returns 404. The local scanner is not connected to the HTTP API and
+is not polled by the daemon yet. No account authentication, setup UI, remote
+source adapters, mailbox mutations, or mail sending is implemented yet.
+
+Direct dependencies are Axum (HTTP), Tokio (runtime/signals), Serde (typed
+configuration), TOML (parser), rusqlite (bundled SQLite), rustix (safe filesystem
+operations), and sha2 (streaming fingerprints). Optional HTTP features are
+disabled. Transitive dependencies are recorded in Cargo.lock; review them as
+part of maintenance. Building bundled SQLite requires a system C compiler.
+On OpenBSD, priv_sep supplies safe pledge/unveil bindings. The executable uses
+separate locked HTTP, configtest, and scan contracts; see man/openmail.8.
+These restrictions are not emulated on Linux/macOS. tests/sandbox.rs exercises
+kernel enforcement in child processes on OpenBSD; native execution is required.
+
+Source layout
+-------------
+Cargo.toml          one package containing one library and one executable
+Cargo.lock          reproducible dependency resolution
+Makefile            operator entry point for build, checks, tests, and staging
+src/main.rs         command line, process startup, exit status
+src/lib.rs          documented public library boundary
+src/config.rs       strict configuration and loopback listener validation
+src/sandbox.rs      OpenBSD syscall and filesystem contracts
+src/web.rs          HTTP routes, health reporting, bounded shutdown
+src/maildir.rs      read-only Maildir++ snapshot collection
+src/store.rs        persistent IDs and transactional reconciliation
+src/schema.sql      versioned source-index schema and change journal
+BACKENDS.txt        existing functionality and source adapter plan
+etc/                example configuration; never production secrets
+man/                mdoc manuals: openmail(8) and openmail.conf(5)
+etc/RELAYD.txt      HTTPS termination and reverse proxy deployment instructions
+etc/MAILDIR.txt     scan configuration, identity guarantees, and limitations
+etc/relayd.conf.example
+                    relayd fragment for the local HTTP service
+../tests/fixtures/openmail-draft/
+                    synthetic MIME message and managed-blob storage option;
+                    see BACKENDS.txt for the separate Maildir design
+
+Rust modules and pub items provide interface declarations; there are no .h
+files or duplicated C-style prototypes. Keep implementation private by default.
+Use pub(crate) for internal interfaces; expose public APIs only when needed.
+Do not generate C headers unless a real external C consumer requires an ABI.
+
+Grow modules as implementation needs them:
+config.rs           load and validate configuration
+store/              SQLite transactions, stable IDs, source mappings, recovery
+source/             concrete IMAP, POP3, and Maildir adapters
+lmtp/               optional later delivery adapter for managed blob storage
+jmap/               client protocol adapter calling the store
+web/                HTTP routes, sessions, setup/admin, built UI assets
+
+These are planned boundaries, not empty modules or independent services.
+Store code must not depend on HTTP or LMTP request types. Protocol adapters
+validate requests and call explicit store operations; main wires them together.
+Start with one crate. Extract libraries only for demonstrated independent use.
+Use maintained protocol/parser libraries when justified; do not hand-roll HTTP,
+MIME parsing, cryptography, or HTML sanitization to minimize dependency count.
+
+Build and packaging
+-------------------
+Requires Rust 1.89+ with Cargo, rustfmt, Clippy, mandoc, and BSD make or GNU make.
+From this directory:
+  make                  release executable and library
+  make check            formatting, Clippy, and mandoc lint
+  make test             configuration, HTTP lifecycle, Maildir and SQLite tests
+  make doc              library API documentation
+  make install DESTDIR=/tmp/openmail-stage
+  make install-config DESTDIR=/tmp/openmail-stage
+
+Make delegates compilation to Cargo/rustc. No custom build.rs, configure system,
+workspace orchestration, or shell build framework is needed initially.
+Targets use Cargo's default target directory; custom CARGO_TARGET_DIR and
+cross-compilation installs need packaging support before use with make install.
+The repository root Makefile still belongs to RainLoop; this directory builds
+independently. Existing PHP/JavaScript builds are not prerequisites for OpenMail.
+
+Install stages the executable under PREFIX/bin and examples under
+PREFIX/share/examples/openmail. It does not create users, change OpenSMTPD,
+overwrite live configuration, or activate a service. See etc/RCCTL.txt for
+OpenBSD service setup; native rc.d validation remains necessary on OpenBSD.
+Manual pages install under PREFIX/man. install-config is an explicit separate
+target for the initial /etc/openmail/config.toml (DESTDIR is supported); it
+refuses existing files or symlinks and never silently replaces settings.
+
+Implementation order
+--------------------
+1. Done: configuration, HTTP listener, health status, bounded shutdown, rc.d example.
+2. Done: read-only Maildir scan, SQLite source mappings, stable IDs and journal.
+3. Authenticated JMAP access and transactional mailbox mutations; SMTP submission.
+4. IMAP and POP3 adapters with explicit capabilities and failure handling.
+5. Browser setup and webmail, native OpenBSD packaging and integration checks.
+Later: optional LMTP managed-blob delivery, other SQL engines.
+
+Next: authenticated account/session boundary, safe message retrieval and MIME
+parsing, then a read-only JMAP surface using the indexed Maildir. Keep metadata
+and raw mail inaccessible through HTTP until authorization is implemented.
+
+Verify real failure boundaries: crash recovery, account isolation, concurrent
+changes, failed delivery, reconnect sync, and mail rendering. Keep tests near
+their code or in package integration tests as each behavior is implemented.
+Do not advertise JMAP capabilities until the required methods work.
+
+Rust interface/build references
+------------------------------
+https://doc.rust-lang.org/book/ch07-02-defining-modules-to-control-scope-and-privacy.html
+https://doc.rust-lang.org/cargo/reference/manifest.html

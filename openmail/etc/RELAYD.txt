@@ -1,0 +1,106 @@
+OpenMail HTTPS through OpenBSD relayd
+=====================================
+
+Status: deployment example for the HTTP daemon. Health routes are implemented;
+mailbox operations and JMAP are pending. The Makefile stages examples without
+changing live system configuration. This is not a working webmail deployment yet.
+
+Request path
+------------
+Browser -> HTTPS on the relay address:443 -> relayd -> http://127.0.0.1:8080
+
+The backend table defaults to IPv4 loopback and port 8080. OpenMail binds to
+127.0.0.1:8080, so clients reach it through relayd rather than directly over the
+network. The HTTPS listener address is independent of the backend address.
+
+relayd owns TLS termination. OpenMail will serve the web UI and JMAP on its local
+HTTP socket. Optional future LMTP delivery is independent of this HTTP proxy.
+Forward all paths unchanged, including /.well-known/jmap, future API routes,
+uploads, downloads, and assets. No application subpath rewriting is needed.
+
+Configuration
+-------------
+Use relayd.conf.example next to this file. Merge its macro, table, protocol,
+and relay blocks into /etc/relayd.conf. Replace the documentation address
+192.0.2.10 in openmail_addr with the intended local HTTPS listen address.
+Keep table <openmail_web> at 127.0.0.1 and its forwarding port at 8080.
+Replace mail.example.com and the certificate paths with
+the chosen TLS hostname and actual certificate files; they are placeholders.
+The example is for a dedicated HTTPS address/listener. If relayd already
+serves that address:443, merge routing into its existing listener instead of
+creating a competing listener. Existing httpd listeners also need coordination.
+
+Provision a certificate chain for the public hostname and its private key using
+your existing certificate process. Keep the private key root-owned and private.
+Renew certificates through that process and reload relayd afterward. OpenMail
+does not need access to TLS private keys. Port 80 and ACME challenges are outside
+this example; retain an existing httpd/ACME setup if used.
+
+Keep OpenMail's configured http_listen at 127.0.0.1:8080. Point public DNS to
+the relay's public address and permit incoming HTTPS in the site's existing PF
+policy. For local-only TLS testing, set openmail_addr to 127.0.0.1 instead.
+Keep the OpenMail backend on loopback in either case. No wildcard
+bind, PF redirection, or transparent-proxy mode is needed for this example.
+
+Application behavior required before production
+----------------------------------------------
+Configure the canonical public origin as https://mail.example.com once the
+application supports that setting. Discovery URLs, download/upload URLs, and
+redirects must use the public HTTPS origin rather than the local HTTP address.
+Validate Host/Origin and CSRF tokens; use Secure, HttpOnly session cookies and
+appropriate SameSite settings. Forwarding headers do not replace authentication.
+
+OpenMail must trust proxy metadata only from its configured local proxy peer.
+relayd overwrites the client address and scheme headers and removes alternative
+forwarding headers; OpenMail should consume only the agreed header set.
+The HTTP peer is relayd, while X-Forwarded-For identifies the browser. The
+loopback trust model assumes other local processes are trusted; re-evaluate it
+on hosts with untrusted local users. These application settings are planned,
+not existing configuration keys or implemented security controls.
+
+The example uses a TCP health check; it proves socket availability, not database
+readiness. /healthz returns 200 for liveness; /readyz returns 503 until mailbox
+support exists. Retain the TCP check to access the development status notice;
+use /readyz as a 200 HTTP health check when serving production mailbox traffic.
+For JMAP event streams, emit regular heartbeats within the session inactivity
+timeout and test reconnection. WebSocket upgrades need an explicit relayd option
+if a future implementation chooses that transport; this example does not enable it.
+
+Validation and operation on the target OpenBSD host
+--------------------------------------------------
+After merging configuration and provisioning certificate files:
+  relayd -n -f /etc/relayd.conf
+
+After installing the OpenMail service as described in RCCTL.txt:
+  rcctl enable openmail
+  rcctl start openmail
+  rcctl check openmail
+
+For a new relayd deployment:
+  rcctl enable relayd
+  rcctl start relayd
+
+For an existing relayd deployment after successful configuration validation:
+  rcctl reload relayd
+
+Then inspect backend status:
+  relayctl show summary
+
+When the HTTPS listener is set to 127.0.0.1, test locally with a trusted certificate:
+  curl --resolve mail.example.com:443:127.0.0.1 https://mail.example.com/
+
+Use --cacert with the appropriate local CA file if testing a private CA.
+For browser testing, map the chosen certificate hostname to 127.0.0.1 in the
+local hosts file; do not change public DNS for a local-only test.
+Visit https://mail.example.com/ and check certificate validity, login, redirects,
+discovery URLs, attachments, and reconnecting sync. Verify spoofed forwarding
+headers do not change the observed scheme/client identity through the proxy.
+Do not use curl -k or browser certificate exceptions to declare TLS successful.
+
+The syntax was compared with the relayd.conf manual; relayd is unavailable in
+the development environment, so native parsing and live proxy tests remain
+required on the target OpenBSD release.
+
+Reference
+---------
+https://man.openbsd.org/relayd.conf

@@ -1,0 +1,30 @@
+[package]
+name = "openmail"
+version = "0.1.0-dev"
+edition = "2024"
+rust-version = "1.89"
+description = "Mailbox storage, JMAP, and webmail for OpenSMTPD"
+license = "MIT"
+publish = false
+
+[dependencies]
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt", "net", "signal", "sync", "time", "io-util"] }
+toml = "0.8"
+rusqlite = { version = "0.41", features = ["bundled"] }
+rustix = { version = "1", features = ["fs"] }
+sha2 = "0.11"
+
+[target.'cfg(target_os = "openbsd")'.dependencies]
+priv_sep = "2.2"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "openmail"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"

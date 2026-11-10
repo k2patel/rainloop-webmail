@@ -1,0 +1,99 @@
+.Dd November 9, 2026
+.Dt OPENMAIL.CONF 5
+.Os
+.Sh NAME
+.Nm openmail.conf
+.Nd OpenMail system configuration
+.Sh DESCRIPTION
+.Nm
+is the configuration format used by
+.Xr openmail 8 .
+The default file is
+.Pa /etc/openmail/config.toml ;
+.Fl f
+selects another file.
+.Pp
+The file uses TOML syntax.
+Unknown keys, duplicate keys, malformed values, and incomplete Maildir
+configuration are errors.
+The file must exist, be a regular file, and contain at most 64 KiB of UTF-8 text.
+An empty file selects the default settings.
+.Pp
+Keep system settings under
+.Pa /etc/openmail ,
+owned by root and readable by the service account.
+Mode 0750 for the directory and 0640 for the file are suitable when the
+service group has read access.
+Keep mail and writable SQLite state outside the configuration directory.
+.Ss Global settings
+.Bl -tag -width Ds
+.It Ic http_listen No = Ar address
+HTTP listen address as a quoted IP address and port.
+The default is
+.Qq 127.0.0.1:8080 .
+Only loopback IP addresses and nonzero ports are accepted.
+IPv6 loopback, for example
+.Qq [::1]:8080 ,
+is supported.
+Hostnames and wildcard addresses are not accepted.
+Terminate public HTTPS at
+.Xr relayd 8
+and forward to this local backend.
+.El
+.Ss Maildir settings
+The optional
+.Ic [maildir]
+table enables configuration for explicit
+.Fl -scan
+operation.
+It is not polled by the HTTP service yet.
+Both settings are required when the table is present:
+.Bl -tag -width Ds
+.It Ic root No = Ar path
+Absolute path to an existing Maildir with
+.Pa tmp ,
+.Pa new ,
+and
+.Pa cur
+directories.
+.It Ic database No = Ar path
+Absolute path to the private SQLite metadata database.
+Its parent directory must exist and the database must be outside the
+Maildir tree and system configuration directory.
+Use a dedicated private directory.
+New database files are created with mode 0600.
+Existing permissions remain the operator's responsibility.
+.El
+.Pp
+Maildir filenames must be UTF-8.
+Messages larger than 64 MiB, ambiguous message keys, and unreadable or
+incomplete mailbox structures cause the scan to fail.
+Message files and traversed mailbox directories must not be symbolic links.
+.Pp
+The database is bound to one canonical Maildir root.
+A different root, unrelated database, or unsupported schema version is rejected.
+SQLite stores IDs, locators, flags, content fingerprints, and change records;
+original message content remains in Maildir.
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa /etc/openmail/
+System settings directory.
+.It Pa /etc/openmail/config.toml
+Required default configuration file.
+.El
+.Sh EXAMPLES
+Default local HTTP service with a Maildir for explicit scans:
+.Bd -literal -offset indent
+http_listen = "127.0.0.1:8080"
+
+[maildir]
+root = "/var/mail/alice/Maildir"
+database = "/var/db/openmail/alice/index.sqlite"
+.Ed
+.Pp
+Validate without opening mail or creating a database:
+.Bd -literal -offset indent
+openmail -n -f /etc/openmail/config.toml
+.Ed
+.Sh SEE ALSO
+.Xr openmail 8

@@ -1,0 +1,157 @@
+.Dd November 9, 2026
+.Dt OPENMAIL 8
+.Os
+.Sh NAME
+.Nm openmail
+.Nd serve OpenMail HTTP status and index a local Maildir
+.Sh SYNOPSIS
+.Nm
+.Op Fl n | Fl -scan
+.Op Fl f Ar file
+.Nm
+.Fl h
+.Nm
+.Fl -version
+.Sh DESCRIPTION
+.Nm
+is the OpenMail service executable.
+It runs in the foreground and listens on a loopback HTTP address.
+The default address is 127.0.0.1:8080.
+Use
+.Xr relayd 8
+for HTTPS termination and reverse proxying.
+.Pp
+The configuration file must exist and pass validation before the service
+starts or a scan runs.
+System configuration is kept in
+.Pa /etc/openmail .
+See
+.Xr openmail.conf 5
+for the configuration format.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl f Ar file , Fl -config Ar file
+Read configuration from
+.Ar file
+instead of
+.Pa /etc/openmail/config.toml .
+.It Fl h , Fl -help
+Display usage information and exit.
+.It Fl n , Fl -check-config
+Check configuration syntax and setting values, then exit.
+Do not open the HTTP listener, Maildir, or SQLite database.
+This does not check runtime path permissions or mailbox readiness.
+.It Fl -scan
+Reconcile a configured Maildir with its private SQLite index, then exit.
+Print message and mailbox counts and the committed local change sequence.
+Do not start HTTP or modify original mail files.
+This option and
+.Fl n
+are mutually exclusive.
+.It Fl -version
+Display the program version and exit.
+.El
+.Pp
+The HTTP routes are:
+.Bl -tag -width "/healthz"
+.It Pa /
+A plain service status notice.
+.It Pa /healthz
+Process liveness; returns HTTP 200.
+.It Pa /readyz
+Mailbox readiness; currently returns HTTP 503.
+.El
+.Pp
+Maildir scanning is read-only and explicitly invoked.
+Background scanning, authentication, JMAP, remote IMAP and POP3 adapters,
+and SMTP submission are not implemented yet.
+Indexed messages are not exposed over HTTP.
+.Ss Maildir indexing
+Scan the
+.Pa new
+and
+.Pa cur
+directories, ignoring
+.Pa tmp .
+Recognize Maildir++ folders below the source root.
+Keep opaque message IDs in SQLite across restarts,
+new-to-cur transitions, and flag changes within a mailbox.
+Separate deliveries retain separate IDs even when their contents match.
+Externally moving a message to another folder is currently represented as
+removal and addition.
+.Pp
+A failed scan leaves the previous committed index intact.
+Retry if concurrent delivery or renaming makes a scan fail.
+The source filesystem is not atomically snapshotted.
+Back up the SQLite index to preserve IDs and deletion history.
+.Ss Sandboxing
+On
+.Ox ,
+.Nm
+uses
+.Xr pledge 2
+and
+.Xr unveil 2
+after loading configuration and preparing required resources.
+Sandbox setup failure stops execution.
+The filesystem rules are locked before handling HTTP requests or scanning.
+.Pp
+The HTTP service retains the
+.Dq stdio inet
+promises and no filesystem paths.
+Configuration checking finishes with only
+.Dq stdio .
+Scanning retains
+.Dq stdio rpath wpath cpath flock fattr ,
+read access to its Maildir and database directory,
+read access to
+.Pa /dev/urandom
+for SQLite randomness,
+and write/create access to the database and its SQLite sidecars only.
+Existing Unix permissions still apply.
+.Pp
+The
+.Dq inet
+promise does not restrict sockets to a particular address or port.
+The application separately validates its loopback listen address.
+These sandbox restrictions are not implemented on other operating systems.
+.Sh SIGNALS
+.Bl -tag -width SIGTERM
+.It Dv SIGINT , SIGTERM
+Stop accepting requests and drain existing requests for up to ten seconds.
+A drain timeout is reported as failure.
+.El
+.Pp
+Configuration reload is not supported.
+Use
+.Cm rcctl restart openmail
+to apply changes.
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa /etc/openmail/config.toml
+Required default configuration file.
+.It Pa /etc/rc.d/openmail
+OpenBSD service script.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+Check configuration and start the installed service:
+.Bd -literal -offset indent
+openmail -n
+rcctl enable openmail
+rcctl start openmail
+.Ed
+.Pp
+Index a configured Maildir once:
+.Bd -literal -offset indent
+openmail --scan -f /etc/openmail/config.toml
+.Ed
+.Sh SEE ALSO
+.Xr pledge 2 ,
+.Xr unveil 2 ,
+.Xr openmail.conf 5 ,
+.Xr rcctl 8 ,
+.Xr relayd 8 ,
+.Xr smtpd 8

@@ -1,0 +1,13 @@
+# Install as /etc/openmail/config.toml. All settings are optional.
+# For public HTTPS through relayd, see RELAYD.txt and relayd.conf.example.
+http_listen = "127.0.0.1:8080"
+
+# Optional read-only Maildir indexing, invoked explicitly with --scan.
+# The daemon does not yet poll this source or expose indexed mail over HTTP.
+# Existing source and private database parent directories must exist.
+# [maildir]
+# root = "/var/mail/alice/Maildir"
+# database = "/var/db/openmail/alice.sqlite"
+
+# Sending and remote source settings will be introduced with their implementations.
+# Unknown keys are rejected so typos cannot silently take effect.

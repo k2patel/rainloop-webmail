@@ -1,0 +1,2 @@
+# Preserve RFC 5322 wire bytes and allow the required CRLF line endings.
+*.eml -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,190 @@
+TEMPORARY DESIGN FIXTURE: OpenMail / JMAP / OpenSMTPD
+
+Status: illustrative managed-blob storage option, not the Maildir layout.
+See openmail/BACKENDS.txt for the current three-source plan and openmail/DESIGN.txt
+for daemon implementation status. SQL backend integration, installer, LMTP
+listener, and setup UI are not implemented by these fixtures.
+All addresses and message content are synthetic.
+
+Design principles: KISS and a focused mail domain
+------------------------------------------------
+OpenMail does one job: provide reliable mailbox access and a web interface
+through JMAP. OpenSMTPD remains responsible for SMTP transport, queueing, retries,
+and relay policy. Follow OpenSMTPD's emphasis on simple configuration, clear
+interfaces, small components, and least privilege; this is an independent
+project, not an OpenSMTPD component or endorsement.
+
+Keep the first implementation small:
+- One OpenMail executable and one rc.d service; serve built web assets directly.
+- SQLite and private local message files first; no database abstraction until
+  a second backend is needed. PostgreSQL/MariaDB examples below are future design.
+- One delivery interface: private LMTP from OpenSMTPD. One client protocol: JMAP.
+- Stable IDs, transactional changes, durable delivery, and recovery are core
+  requirements; simplicity must preserve those guarantees.
+- Use base OpenBSD facilities for service control, HTTPS proxying, and logging.
+- Keep configuration explicit, errors actionable, and dependencies reviewed.
+- Validate mailbox behavior before adding features; advertise only implemented
+  JMAP capabilities and verify protocol conformance.
+
+OpenMail does not implement an SMTP transport, its own retry queue, IMAP,
+POP3, DNS management, certificate issuance, antivirus, calendars, or a plugin
+framework. Compose with existing tools for those responsibilities.
+The setup UI configures OpenMail and exports a small OpenSMTPD configuration
+fragment for operator review. Start with documented local install steps rather
+than building a general system configuration manager or privileged web backend.
+The installer mentioned below is a future scoped packaging step.
+
+Web service and OpenBSD lifecycle
+--------------------------------
+OpenMail is a persistent web daemon written in Rust managed through rcctl. One
+binary serves the browser UI, authenticated setup/admin routes, and JMAP API.
+It also provides a separate private LMTP listener for OpenSMTPD delivery.
+PHP-FPM and a separate frontend runtime are not needed for this proposed app;
+built frontend assets are served by the Rust HTTP server.
+
+Project name: OpenMail. Executable and service name: openmail (not installed yet).
+Proposed binary: /usr/local/bin/openmail
+Proposed configuration: /etc/openmail/config.toml
+Proposed service script: /etc/rc.d/openmail
+Run as a dedicated unprivileged account, with access to its private storage.
+The rc.d script must support the binary's foreground/background behavior.
+
+Example operator commands AFTER implementing and installing that service:
+  rcctl enable openmail
+  rcctl start openmail
+  rcctl check openmail
+  rcctl restart openmail
+  rcctl stop openmail
+
+Listen address and port are configuration options. Proposed initial default:
+  http_listen = "127.0.0.1:8080"
+  lmtp_socket = "/var/run/openmail/lmtp.sock"
+
+An operator on the host can open http://127.0.0.1:8080/; remote setup can use
+an SSH tunnel. Production browsers connect via HTTPS through relayd to this
+HTTP listener. A configured non-loopback bind permits direct network access;
+require HTTPS at the application or trusted proxy before remote credential use.
+LMTP is separate from the web port, with socket permissions allowing only the
+delivery service and application accounts. Keep all mail data outside web roots.
+
+First start serves a setup wizard until configured; require a locally generated
+one-time setup token before accepting settings. After setup, disable bootstrap
+access and require an authenticated administrator for configuration changes.
+Database/storage credentials are stored in a protected server configuration.
+The web daemon can manage application data and produce system config previews;
+rcctl startup does not give it permission to edit OpenSMTPD system files.
+Apply those changes through the local installer described below.
+If the mailbox service is unavailable, OpenSMTPD queues/retries delivery; database
+lookup failures must produce temporary failures rather than unknown-user replies.
+
+Setup flow proposed for the future UI
+-----------------------------------
+1. Start with SQLite on one host. PostgreSQL/MariaDB remain future options.
+2. Select a new database or connect to an existing one; review migrations.
+3. Configure domains, virtual accounts, aliases, storage root, and quotas.
+4. Generate OpenSMTPD SQL lookup configuration and LMTP delivery configuration.
+5. Preview configuration changes and validate on the target OpenBSD release.
+6. A local privileged installer applies system configuration and starts services.
+7. Check recipient lookup, unknown-recipient rejection, delivery, JMAP sync,
+   authenticated sending, and absence of unintended relay permissions.
+
+The browser must not run as root or execute arbitrary supplied commands. Setup
+should export configuration or invoke a narrowly scoped local installer. Never
+expose database credentials or server filesystem paths in ordinary mail UI/API
+responses. Existing OpenSMTPD configuration needs a merge, backup, and rollback.
+
+Service boundaries
+------------------
+OpenSMTPD -> SQL directory lookup: domains, valid recipients, aliases, credentials
+OpenSMTPD -> OpenMail LMTP listener: message envelope and original message bytes
+OpenMail -> SQL mailbox records: IDs, memberships, keywords, quotas, sync journal
+OpenMail -> private local files: immutable original messages
+Browser  -> OpenMail JMAP API over HTTPS
+OpenMail -> OpenSMTPD submission: outgoing mail
+
+SQL table helpers are additional OpenSMTPD components. Verify package/backend
+availability on the target release. MariaDB requires verification with the MySQL
+helper. SMTP authentication hashes must match the selected helper's expectations;
+web authentication and SMTP credentials need not share a password-hash format.
+
+With PostgreSQL/MariaDB, use a restricted lookup role for OpenSMTPD and an app
+role for OpenMail; mailbox tables must not be writable by the lookup role.
+With SQLite, use a separate directory.sqlite and mailbox.sqlite to isolate file
+access. OpenMail manages provisioning changes in directory.sqlite.
+Separate SQLite files do not give one atomic transaction across provisioning
+and mailbox state; create accounts disabled, provision, then enable routing.
+
+Proposed private runtime layout (paths illustrative)
+--------------------------------------------------
+/var/mail/openmail/
+  directory.sqlite                 SQLite directory, if selected
+  mailbox.sqlite                   SQLite mailbox state, if selected
+  staging/                         incomplete deliveries; never served
+  accounts/<account-id>/blobs/
+    <first-two-hash-characters>/<sha256>.eml
+
+For PostgreSQL/MariaDB, database files are managed by that database server;
+message files still live under this storage root. Account IDs are internally
+generated; never use an unvalidated recipient address as a filesystem path.
+
+This draft uses immutable .eml blobs, not a Maildir directory tree. SQL owns
+folder memberships. Existing Maildir would need an importer; continued external
+Maildir modifications would require a separate reconciliation design.
+
+What is included here
+---------------------
+database-records.json       logical rows for one account and one received email
+accounts/acct_demo/blobs/   an actual RFC 5322/MIME .eml file with an attachment
+
+The blob row records the real SHA-256, relative file path, and byte length.
+Attachments remain inside the original MIME message; separate decoded files
+are optional caches. APIs may expose attachment blob IDs backed by MIME parts.
+JSON here illustrates DB contents; it is not the message storage format.
+
+Identity and sync rules
+-----------------------
+email_demo identifies the account's Email object permanently. blob_demo points
+to its immutable bytes. message_id_header is sender-controlled metadata.
+An SQL primary key (encoded as a valid JMAP ID) or generated opaque ID works.
+Never regenerate or reuse public IDs, including after restore or migration.
+Hash-based storage keys are internal, account-scoped, and not access tokens.
+
+Move to Archive: replace Inbox membership with Archive membership; retain the
+Email/blob IDs; commit an Email updated event with the new state.
+Mark read: add the $seen keyword and commit another updated event.
+Destroy: remove the Email and memberships; retain a destroyed event/tombstone.
+Garbage-collect bytes only when no live reference or pending operation needs them.
+Enforce account-scoped foreign keys and ownership checks on all memberships.
+
+Every visible mutation and its sync event/state update must commit together.
+Serialize state allocation per account so sequence ordering matches commits;
+an ordinary global auto-increment counter alone is insufficient.
+Clients use opaque state tokens derived from committed state. Expired change
+history requires JMAP cannotCalculateChanges and a client resync.
+Mailbox and Thread changes also need type-specific tracking in the real service;
+the JSON shows only one Email creation, not a complete JMAP implementation.
+
+Durable delivery and recovery
+-----------------------------
+Write bytes to staging, flush, atomically publish on the same filesystem, and
+flush the destination directory as required. Commit mailbox rows, quota usage,
+and sync events transactionally before acknowledging LMTP success per recipient.
+Never commit a readable Email referencing an incomplete file.
+Use recovery records and delayed garbage collection for interrupted deliveries
+and orphaned blobs; filesystem and SQL writes are not one atomic transaction.
+Use temporary delivery failures when durable acceptance is impossible.
+If acknowledgement is lost after commit, SMTP/LMTP retry can deliver a duplicate;
+do not claim exactly-once delivery or deduplicate solely by Message-ID/content.
+Back up authoritative IDs, journal/state, directory data, and blobs consistently.
+Search indexes and decoded attachment caches may be rebuilt; IDs must survive.
+
+Reference material checked for this draft
+----------------------------------------
+https://man.openbsd.org/smtpd.conf
+https://github.com/OpenSMTPD/table-sqlite
+https://github.com/OpenSMTPD/table-postgres
+https://github.com/OpenSMTPD/table-mysql
+https://www.rfc-editor.org/rfc/rfc8620
+https://www.rfc-editor.org/rfc/rfc8621
+https://man.openbsd.org/rc.d
+https://man.openbsd.org/rcctl

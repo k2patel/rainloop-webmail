@@ -1,0 +1,109 @@
+OpenMail mail sources and existing RainLoop behavior
+====================================================
+
+Status: Maildir has a read-only scanner and persistent SQLite source index,
+invoked with --scan (see etc/MAILDIR.txt). Daemon polling and authenticated API
+access are pending. IMAP and POP3 adapters are not implemented yet. A backend
+is a mailbox source, not a choice of SQL database.
+
+Existing implementation inspected
+---------------------------------
+rainloop/v/0.0.0/app/libraries/MailSo/Mail/MailClient.php
+  Creates an ImapClient and delegates mailbox operations to it. Includes
+  listing/fetching, MIME streaming, flags, moves, copies, append, deletion,
+  folder status, search, and capability-sensitive behavior such as CONDSTORE.
+rainloop/v/0.0.0/app/libraries/RainLoop/Actions.php
+  HTTP actions include DoFolders, DoMessageList, DoSaveMessage, DoSendMessage,
+  DoMessageSetSeen, and DoMessageMove. Sending uses a separate SmtpClient;
+  draft/sent-message storage must be considered separately from submission.
+rainloop/v/0.0.0/app/libraries/RainLoop/Model/Account.php
+  Configures outgoing credentials and SMTP connection/login, including OAuth.
+rainloop/v/0.0.0/app/libraries/MailSo/Pop3/Pop3Client.php
+  Bundled POP3 transport implementation. Its presence does not establish
+  POP3 support throughout RainLoop's IMAP-oriented mailbox/UI workflow.
+
+These are code-review findings, not verified live account interoperability.
+Contacts, filters, OpenPGP, plugins, and other existing functionality require
+separate migration decisions; they are not automatically covered by mail parity.
+
+Mail source types
+------------------
+IMAP: existing remote mail server
+  Read folders/messages, update server flags, search and move where supported.
+  Map account + mailbox identity + UIDVALIDITY + UID to OpenMail IDs; a bare
+  UID is not a global message identity. Account for mailbox renames, UID resets,
+  and external clients. Preserve IDs for known moves when mapping is reliable;
+  do not promise identity continuity for arbitrary external copy/delete actions.
+  Use server extensions when available and define fallbacks explicitly.
+
+POP3: retrieval into an OpenMail-managed mailbox
+  POP3 supplies messages and deletion, not server folders/read flags/drafts.
+  Store folder organization, flags, search and sync history locally in SQLite.
+  Track account + UIDL, never transient message numbers. UIDL is optional in
+  POP3: persistent unattended sync needs a documented policy if unavailable;
+  refuse that mode initially rather than silently duplicate or lose mail.
+  Default to leaving source mail on the server. Remote deletion is an explicit
+  policy and happens only after durable local storage; handle QUIT failure.
+  Local organization does not synchronize back to other POP3 clients.
+
+Maildir: direct access to a local mailbox
+  Read tmp/new/cur and Maildir flags. Specify the folder convention (Maildir++
+  initially) rather than guessing layouts. Index deliveries from OpenSMTPD and
+  reconcile filename changes and external flag/folder modifications.
+  SQL retains stable IDs and local sync history. Paths and inode numbers alone
+  are insufficient identity keys. A move made by OpenMail keeps its identity;
+  unobserved external moves/duplicates require a conservative reconciliation
+  policy. Never infer message identity solely from Message-ID or content hash.
+  Implement a read-only scanner first, then verified atomic mutations. Do not
+  rewrite existing Maildir content to match the immutable-blob fixture layout.
+
+JMAP is the client-facing API, not a fourth backend
+  The browser talks to OpenMail through JMAP. OpenMail translates mailbox
+  operations to one of the three sources above. An upstream JMAP client adapter
+  is outside the agreed scope. OpenSMTPD is not a JMAP endpoint.
+
+Sending and delivery are separate from source selection
+-------------------------------------------------------
+All three initial source modes can use a configured SMTP submission server,
+including OpenSMTPD. A successful SMTP submission does not itself create a
+Sent-folder copy. Preserve sent copies through the selected storage adapter
+and surface failures separately to avoid duplicate sends on retry.
+
+For Maildir, OpenSMTPD can deliver directly to the folder: no OpenMail LMTP
+listener is required for that arrangement. LMTP is an optional later delivery
+adapter for OpenMail-owned blob storage, not a fourth mailbox source or a
+prerequisite for IMAP/POP3/Maildir. The blob fixtures illustrate that separate
+managed-storage option; they do not replace the requested Maildir adapter.
+
+KISS implementation boundary
+----------------------------
+Keep a concrete set of source adapters in one library, with explicit capabilities
+and unsupported-operation errors. Build the shared mailbox operations from the
+first real adapter rather than guessing a universal interface now. Never claim
+that POP3 offers server-side folder/flag synchronization.
+SQLite stores local metadata/source mappings independently of source type.
+PostgreSQL/MariaDB are future metadata/directory choices, not mail protocols.
+
+Other ways to access mail
+-------------------------
+mbox and .eml archives: start as import/export formats, not live shared storage.
+Provider-specific APIs (for example Microsoft Graph or Gmail API): add only
+when an account requirement justifies separate authentication and sync logic.
+ManageSieve: filtering configuration, not a mailbox source.
+SMTP and LMTP: transport/delivery, not browsing and synchronization protocols.
+No other source type is required for the initial three-mode scope.
+
+Acceptance checks before calling any adapter supported
+-------------------------------------------------------
+Verify account isolation, TLS certificate validation for remote connections,
+credential handling, listing/reading/attachments, flags, folders, search,
+draft/sent storage, deletes, reconnect sync, and restart identity persistence.
+Exercise external mailbox changes, duplicates, network failure, and interrupted
+local writes. Unsupported features must be explicit in the API and UI.
+
+Protocol references
+-------------------
+https://www.rfc-editor.org/rfc/rfc9051
+https://www.rfc-editor.org/rfc/rfc1939
+https://www.rfc-editor.org/rfc/rfc8621
+https://man.openbsd.org/smtpd.conf
